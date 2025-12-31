@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "n8n": {
+      "transport": "http",
+      "url": "https://dyoon.app.n8n.cloud/mcp-server/httpz",
+      "description": "n8n workflow automation MCP server"
+    }
+  }
+}
