@@ -39,6 +39,9 @@ build/
 *.env
 .envrc
 
+# MCP Configuration (contains tokens)
+.mcp.json
+
 # Build outputs
 *.o
 *.so
