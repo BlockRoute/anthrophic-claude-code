@@ -20,6 +20,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { palette } from '../lib/theme';
 import { useStore } from '../lib/store';
+import { currentUserId } from '../lib/auth';
+import { isCloudEnabled } from '../lib/supabase';
+import { pullSnapshot, startAutoSync } from '../lib/sync';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -42,6 +45,19 @@ export default function RootLayout() {
     if (ready) SplashScreen.hideAsync().catch(() => {});
   }, [ready]);
 
+  // Restore a cloud session on launch and resume syncing.
+  useEffect(() => {
+    if (!ready || !isCloudEnabled) return;
+    let stop: (() => void) | undefined;
+    currentUserId().then((uid) => {
+      if (!uid) return;
+      pullSnapshot(uid).finally(() => {
+        stop = startAutoSync(uid);
+      });
+    });
+    return () => stop?.();
+  }, [ready]);
+
   if (!ready) return <View style={{ flex: 1, backgroundColor: palette.base }} />;
 
   return (
@@ -58,10 +74,6 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="(onboarding)" />
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen
-            name="food-detail"
-            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-          />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

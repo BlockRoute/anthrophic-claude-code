@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { AppText, Button, Overline, Screen } from '../../components/ui';
 import { SegmentedControl, StepDots, TextField } from '../../components/inputs';
-import { signIn, signUp } from '../../lib/auth';
+import { currentUserId, signIn, signUp } from '../../lib/auth';
 import { useOnboarding } from '../../lib/onboarding';
 import { useStore } from '../../lib/store';
 import { isCloudEnabled } from '../../lib/supabase';
+import { pullSnapshot, startAutoSync } from '../../lib/sync';
 import { palette, spacing } from '../../lib/theme';
 
 export default function Auth() {
@@ -36,6 +37,20 @@ export default function Auth() {
     }
     setLocalUser({ email, name: name || email.split('@')[0] });
     setDraft({ name: name || email.split('@')[0] });
+
+    // Cloud mode: pull any existing data and keep it in sync from here on.
+    if (isCloudEnabled) {
+      const uid = await currentUserId();
+      if (uid) {
+        await pullSnapshot(uid);
+        startAutoSync(uid);
+        // If this account was already onboarded on another device, skip ahead.
+        if (useStore.getState().onboarded) {
+          router.replace('/(tabs)');
+          return;
+        }
+      }
+    }
     router.push('/(onboarding)/profile');
   };
 

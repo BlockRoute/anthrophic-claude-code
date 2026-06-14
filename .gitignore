@@ -147,3 +147,11 @@ _site/
 # Backup files
 *~
 *.backup
+
+# Expo / React Native
+.expo/
+.expo-shared/
+web-build/
+*.orig.*
+ios/
+android/
