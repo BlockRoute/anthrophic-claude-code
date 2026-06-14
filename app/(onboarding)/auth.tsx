@@ -30,11 +30,21 @@ export default function Auth() {
     }
     setBusy(true);
     const res = mode === 'signup' ? await signUp(email, password) : await signIn(email, password);
-    setBusy(false);
     if (!res.ok) {
+      setBusy(false);
       setError(res.error ?? 'Something went wrong.');
       return;
     }
+    // Cloud signups are auto-confirmed server-side; establish a session now.
+    if (mode === 'signup' && res.needsConfirmation && isCloudEnabled) {
+      const session = await signIn(email, password);
+      if (!session.ok) {
+        setBusy(false);
+        setError('Account created — check your email to confirm, then sign in.');
+        return;
+      }
+    }
+    setBusy(false);
     setLocalUser({ email, name: name || email.split('@')[0] });
     setDraft({ name: name || email.split('@')[0] });
 
