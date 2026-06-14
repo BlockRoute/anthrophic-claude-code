@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Verdant",
+    "slug": "verdant",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "verdant",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0A0E0D",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "userInterfaceStyle": "dark",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Verdant uses the camera to scan food barcodes so it can log nutrition automatically."
+      }
+    },
+    "android": {
+      "userInterfaceStyle": "dark",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0E0D"
+      },
+      "permissions": ["CAMERA", "POST_NOTIFICATIONS", "SCHEDULE_EXACT_ALARM"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Verdant uses the camera to scan food barcodes so it can log nutrition automatically."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#5BE7A8"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
