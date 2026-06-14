@@ -19,6 +19,10 @@ export const supabase: SupabaseClient | null = isCloudEnabled
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: false,
+        // PKCE is the robust flow for mobile deep-link email confirmation:
+        // signUp stores a verifier, and the email link returns a `code` we
+        // exchange for a session via exchangeCodeForSession().
+        flowType: 'pkce',
       },
     })
   : null;

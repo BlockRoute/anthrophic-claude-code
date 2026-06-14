@@ -49,6 +49,21 @@ The app works immediately in **local mode** (data stored on-device).
 4. Restart the dev server. Sign-up now creates a real account and your data
    syncs across devices.
 
+**Email confirmation deep link.** Sign-up uses Supabase's PKCE flow; the
+confirmation email returns to `verdant://auth-callback`, which is handled by
+`app/auth-callback.tsx` (exchanges the code for a session, then continues
+onboarding). In the Supabase dashboard add this under
+**Authentication → URL Configuration → Redirect URLs**:
+
+```
+verdant://auth-callback
+exp://127.0.0.1:8081/--/auth-callback   # for Expo Go during development
+```
+
+Email delivery needs an SMTP provider configured under
+**Authentication → Emails → SMTP Settings** (Resend or Brevo both have free
+tiers); the built-in sender is rate-limited and for testing only.
+
 ## Architecture
 
 ```
