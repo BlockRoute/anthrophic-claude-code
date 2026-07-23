@@ -1,0 +1,499 @@
+<title>Richmond ZIP Edge — Market Heat Index</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e;
+  --muted: #898781; --grid: #e1e0d9; --axis: #c3c2b7;
+  --border: rgba(11,11,11,0.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --seq-lo: #cde2fb; --seq-hi: #0d366b;
+  --div-cool: #2a78d6; --div-warm: #e34948; --div-mid: #f0efec;
+  --chip-ink: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7;
+    --muted: #898781; --grid: #2c2c2a; --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --seq-lo: #184f95; --seq-hi: #9ec5f4;
+    --div-cool: #3987e5; --div-warm: #e66767; --div-mid: #383835;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7;
+  --muted: #898781; --grid: #2c2c2a; --axis: #383835;
+  --border: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --seq-lo: #184f95; --seq-hi: #9ec5f4;
+  --div-cool: #3987e5; --div-warm: #e66767; --div-mid: #383835;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 80px; }
+header.masthead { padding: 8px 0 20px; border-bottom: 1px solid var(--grid); margin-bottom: 24px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.12; margin: 6px 0 8px;
+  font-weight: 750; letter-spacing: -0.015em; text-wrap: balance; }
+.sub { color: var(--ink-2); max-width: 62ch; margin: 0; }
+h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px; text-wrap: balance; }
+h3 { font-size: 15px; font-weight: 650; margin: 0 0 6px; }
+section { margin: 36px 0; }
+.section-note { color: var(--ink-2); margin: 0 0 16px; max-width: 72ch; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 20px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.tile .label { font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.tile .value { font-size: 28px; font-weight: 750; letter-spacing: -0.01em; margin-top: 2px; }
+.tile .hint { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+.tile .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.chart-scroll { overflow-x: auto; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-2); margin: 8px 0 14px; }
+.legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.legend .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+#tooltip { position: fixed; pointer-events: none; z-index: 50; background: var(--surface);
+  color: var(--ink); border: 1px solid var(--border); border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18); padding: 8px 11px; font-size: 13px;
+  max-width: 280px; display: none; }
+#tooltip .t-head { font-weight: 650; margin-bottom: 3px; }
+#tooltip .t-row { display: flex; justify-content: space-between; gap: 14px; color: var(--ink-2); }
+#tooltip .t-row b { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 7px 10px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted);
+  border-bottom: 1px solid var(--axis); cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface); }
+thead th:focus-visible { outline: 2px solid var(--s1); outline-offset: -2px; }
+tbody tr { border-bottom: 1px solid var(--grid); }
+tbody tr:hover { background: color-mix(in srgb, var(--s1) 6%, transparent); }
+.chip { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 2px 8px; border-radius: 99px; color: var(--chip-ink); }
+.chip.gold { background: var(--s1); } .chip.catch { background: var(--s2); } .chip.lev { background: var(--s3); }
+.thin-note { color: var(--muted); font-size: 11.5px; }
+.playbook { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.play { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+.play .chip { margin-bottom: 8px; }
+.play p { margin: 6px 0 0; color: var(--ink-2); font-size: 14px; }
+.play .script { border-left: 3px solid var(--grid); padding: 6px 12px; margin-top: 10px;
+  font-size: 13.5px; color: var(--ink); background: color-mix(in srgb, var(--ink) 3%, transparent); border-radius: 0 6px 6px 0; }
+.method { font-size: 14px; color: var(--ink-2); }
+.method b { color: var(--ink); }
+.method ol { padding-left: 20px; } .method li { margin: 6px 0; }
+.caveat { border-left: 3px solid var(--s4); padding: 10px 14px; background: var(--surface);
+  border-radius: 0 8px 8px 0; font-size: 13.5px; color: var(--ink-2); margin-top: 14px; }
+@media (prefers-reduced-motion: no-preference) {
+  .tile, .play { transition: transform .15s ease; }
+}
+</style>
+
+<div class="wrap">
+<header class="masthead">
+  <div class="eyebrow">Yoon Realty · Market Intelligence · Data through __ASOF__</div>
+  <h1>Richmond ZIP Edge: one metro, 74 different markets</h1>
+  <p class="sub">The metro headline says "moderate seller's market, 99% of asking."
+  The ZIP-level data says that's an average of extremes: some ZIPs clear in 5 days at 109% of ask
+  while others sit 90+ days below asking. This dashboard scores every ZIP in the Richmond metro
+  so you know which market you're actually standing in — before the other agent does.</p>
+  <div class="tiles" id="tiles"></div>
+</header>
+
+<section>
+  <h2>1 · Market Heat Index leaderboard</h2>
+  <p class="section-note">Every ZIP scored 0–100 on four demand signals — days on market,
+  sale-to-list ratio, share sold above list, and share off-market within two weeks —
+  each taken as a percentile rank against the rest of the metro, then averaged
+  (3-month rolling data so one weird month can't fake a trend). 100 = the hottest market in the metro.
+  Showing ZIPs averaging 10+ sales/month; the full table below has all of them.</p>
+  <div class="card chart-scroll"><div id="heatChart"></div></div>
+</section>
+
+<section>
+  <h2>2 · The opportunity map</h2>
+  <p class="section-note">Heat (vertical) against 5-year appreciation vs. the metro median (horizontal).
+  Upper-left is the money quadrant: buyer demand is hot <i>today</i> but the ZIP hasn't yet
+  appreciated like the rest of the metro — that's where equity catch-up tends to happen.</p>
+  <div class="card">
+    <div class="legend" id="scatterLegend"></div>
+    <div class="chart-scroll"><div id="scatterChart"></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · Momentum: who's heating, who's cooling</h2>
+  <p class="section-note">Change in Heat Index vs. twelve months ago. Warm bars are accelerating —
+  get listings there and price ambitiously. Cool bars are decelerating — your buyers have
+  negotiating leverage there right now, whatever the metro headline says.</p>
+  <div class="card chart-scroll"><div id="momoChart"></div></div>
+</section>
+
+<section>
+  <h2>4 · The four core localities since 2019</h2>
+  <p class="section-note">Median sale price by month (3-month smoothed lines; hover shows the raw
+  monthly figure), from the same Redfin feed at county level. Context for the ZIP scores: the
+  metro-wide climb has flattened into a plateau with seasonal swings — which is exactly why
+  ZIP selection now matters more than "the market."</p>
+  <div class="card">
+    <div class="legend" id="trendLegend"></div>
+    <div class="chart-scroll"><div id="trendChart"></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>5 · Full ZIP table</h2>
+  <p class="section-note">All scored ZIPs — click any column header to sort. Thin-volume ZIPs
+  (under 10 sales/month) are scored but marked <span class="thin-note">thin</span>; treat those
+  numbers as directional, not gospel.</p>
+  <div class="card" style="max-height: 520px; overflow: auto;"><table id="zipTable"></table></div>
+</section>
+
+<section>
+  <h2>How to turn this into income</h2>
+  <div class="playbook">
+    <div class="play"><span class="chip gold">LISTING GOLDMINE</span>
+      <h3 id="goldList"></h3>
+      <p>Hot and getting hotter. Farm these ZIPs for listings: every mailer, door-knock,
+      and open-house conversation leads with the ZIP's own numbers — specificity is what
+      generic "just sold!" postcards can't match.</p>
+      <div class="script" id="goldScript"></div>
+    </div>
+    <div class="play"><span class="chip catch">CATCH-UP BUY</span>
+      <h3 id="catchList"></h3>
+      <p>Demand is hot today but 5-year appreciation trails the metro — the classic setup
+      for equity catch-up. This is your investor-client pitch and your first-time-buyer
+      steer: buy where the heat arrived before the price did.</p>
+      <div class="script" id="catchScript"></div>
+    </div>
+    <div class="play"><span class="chip lev">BUYER LEVERAGE</span>
+      <h3 id="levList"></h3>
+      <p>Cooling fastest year-over-year. Buyers you represent here should offer under ask,
+      demand concessions, and take their time — and showing them this chart is how you win
+      the client in the first place.</p>
+      <div class="script" id="levScript"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>What you're looking at & how it was built</h2>
+  <div class="card method">
+    <p><b>Source.</b> Redfin's public Data Center feed (<i>zip_code_market_tracker</i> and
+    <i>county_market_tracker</i>) — monthly, ZIP-level closed-sale statistics for every ZIP in the
+    Richmond, VA metro, 2012 to present. It's free and public, but it ships as a ~1&nbsp;GB national
+    raw file with no per-ZIP view, which is why effectively no working agent uses it.</p>
+    <ol>
+      <li><b>Extract:</b> streamed the national file, kept Virginia rows, restricted to
+      <i>parent metro = Richmond, VA</i>, property type "All Residential."</li>
+      <li><b>Smooth:</b> 3-month rolling averages per ZIP, and ZIPs under ~3 sales/month excluded
+      from scoring (under 10/month flagged thin).</li>
+      <li><b>Score:</b> Heat Index = mean percentile rank across the four demand signals.
+      Momentum = Heat now minus Heat a year ago. Value gap = ZIP 5-yr appreciation minus the
+      metro median (__APPR__%).</li>
+      <li><b>Flag:</b> Heat ≥ 80 and rising → <i>Listing Goldmine</i>; Heat ≥ 70 with appreciation
+      below metro → <i>Catch-up Buy</i>; Momentum ≤ −15 → <i>Buyer Leverage</i>.</li>
+    </ol>
+    <div class="caveat"><b>Honest caveats:</b> data runs through <b>__ASOF__</b> (Redfin's public
+    file lags a few months). Median prices in small ZIPs swing with the mix of what happened to sell.
+    The Heat Index ranks ZIPs against each other <i>within</i> this metro — it is not a forecast, an
+    appraisal, or a guarantee. Verify against fresh MLS comps before you put a number in front of a client.</div>
+  </div>
+</section>
+</div>
+<div id="tooltip" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = __DATA__;
+
+const fmt$ = v => v == null ? "—" : "$" + Math.round(v).toLocaaleString?.() ;
+const money = v => v == null ? "—" : "$" + Math.round(v).toLocaleString("en-US");
+const moneyK = v => v == null ? "—" : (v >= 1e6 ? "$" + (v/1e6).toFixed(2) + "M" : "$" + Math.round(v/1e3) + "K");
+const pct = v => v == null ? "—" : v.toFixed(1) + "%";
+const n1 = v => v == null ? "—" : (+v).toFixed(0);
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+const zips = DATA.zips;
+const byHeat = [...zips].sort((a,b) => b.heat_index - a.heat_index);
+const solid = byHeat.filter(z => z.homes_sold_3m_avg >= 10);
+
+/* ---------- tooltip ---------- */
+const tip = document.getElementById("tooltip");
+function showTip(evt, html) {
+  tip.innerHTML = html; tip.style.display = "block";
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + w > innerWidth - 8) x = evt.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = evt.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+function zipTip(z) {
+  return `<div class="t-head">${z.zip} · ${z.area || "Richmond metro"}</div>
+  <div class="t-row"><span>Heat Index</span><b>${z.heat_index}</b></div>
+  <div class="t-row"><span>Median sale price</span><b>${money(z.median_sale_price)}</b></div>
+  <div class="t-row"><span>Days on market</span><b>${n1(z.median_dom)}</b></div>
+  <div class="t-row"><span>Sale-to-list</span><b>${pct(z.sale_to_list_pct)}</b></div>
+  <div class="t-row"><span>Sold above list</span><b>${pct(z.sold_above_list_pct)}</b></div>
+  <div class="t-row"><span>5-yr appreciation</span><b>${pct(z.appreciation_5y_pct)}</b></div>
+  <div class="t-row"><span>Heat vs last year</span><b>${z.heat_momentum == null ? "—" : (z.heat_momentum > 0 ? "+" : "") + z.heat_momentum}</b></div>
+  <div class="t-row"><span>Sales/mo (3-mo avg)</span><b>${n1(z.homes_sold_3m_avg)}</b></div>`;
+}
+
+/* ---------- stat tiles ---------- */
+(function tiles() {
+  const host = document.getElementById("tiles");
+  const hottest = solid[0];
+  const cooler = [...solid].sort((a,b) => (a.heat_momentum ?? 0) - (b.heat_momentum ?? 0))[0];
+  const counts = f => zips.filter(z => z.flag === f).length;
+  const t = [
+    { label: "Hottest ZIP", value: hottest.zip, hint: `${hottest.area} · Heat ${hottest.heat_index}` },
+    { label: "Cooling fastest", value: cooler.zip, hint: `${cooler.area} · ${cooler.heat_momentum} Heat vs LY` },
+    { label: "Listing goldmines", value: counts("LISTING GOLDMINE"), hint: "hot + still heating", dot: "var(--s1)" },
+    { label: "Catch-up buys", value: counts("CATCH-UP BUY"), hint: "hot demand, lagging price", dot: "var(--s2)" },
+    { label: "Buyer-leverage ZIPs", value: counts("BUYER LEVERAGE"), hint: "cooling ≥15 pts", dot: "var(--s3)" },
+  ];
+  host.innerHTML = t.map(x => `<div class="tile"><div class="label">${x.label}</div>
+    <div class="value">${x.dot ? `<span class="dot" style="background:${x.dot}"></span>` : ""}${x.value}</div>
+    <div class="hint">${x.hint}</div></div>`).join("");
+})();
+
+/* ---------- 1: heat leaderboard (horizontal bars, sequential) ---------- */
+(function heat() {
+  const rows = solid;
+  const W = 980, rowH = 26, padL = 300, padR = 70, H = rows.length * rowH + 30;
+  const x = v => padL + (v / 100) * (W - padL - padR);
+  const lerp = (a,b,t) => Math.round(a + (b-a)*t);
+  const hex2rgb = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+  const lo = hex2rgb(css("--seq-lo")), hi = hex2rgb(css("--seq-hi"));
+  const seq = t => `rgb(${lerp(lo[0],hi[0],t)},${lerp(lo[1],hi[1],t)},${lerp(lo[2],hi[2],t)})`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="min-width:760px" role="img" aria-label="Heat index by ZIP, ranked">`;
+  for (const g of [0,25,50,75,100])
+    s += `<line x1="${x(g)}" y1="14" x2="${x(g)}" y2="${H-16}" stroke="var(--grid)" stroke-width="1"/>
+          <text x="${x(g)}" y="${H-2}" text-anchor="middle" font-size="11" fill="var(--muted)">${g}</text>`;
+  rows.forEach((z, i) => {
+    const y = 18 + i * rowH, bh = rowH - 8;
+    const w = Math.max(x(z.heat_index) - x(0), 10);
+    s += `<g class="hband" data-i="${i}">
+      <rect x="0" y="${y-4}" width="${W}" height="${rowH}" fill="transparent"/>
+      <text x="${padL-10}" y="${y + bh/2 + 4}" text-anchor="end" font-size="12.5" fill="var(--ink)">${z.zip}<tspan fill="var(--muted)"> · ${(z.area||"").replace(/ \(.*\)/,"")}</tspan></text>
+      <path d="M${x(0)},${y} h${w-4} a4,4 0 0 1 4,4 v${bh-8} a4,4 0 0 1 -4,4 h-${w-4} z" fill="${seq(z.heat_index/100)}"/>
+      <text x="${x(z.heat_index)+6}" y="${y + bh/2 + 4}" font-size="12" font-weight="600" fill="var(--ink)">${z.heat_index}</text></g>`;
+  });
+  s += `<line x1="${x(0)}" y1="14" x2="${x(0)}" y2="${H-16}" stroke="var(--axis)" stroke-width="1"/></svg>`;
+  const host = document.getElementById("heatChart");
+  host.innerHTML = s;
+  host.querySelectorAll(".hband").forEach(g => {
+    const z = rows[+g.dataset.i];
+    g.addEventListener("mousemove", e => showTip(e, zipTip(z)));
+    g.addEventListener("mouseleave", hideTip);
+  });
+})();
+
+/* ---------- 2: opportunity scatter ---------- */
+(function scatter() {
+  const W = 940, H = 480, padL = 52, padR = 20, padT = 18, padB = 42;
+  const xs = zips.map(z => z.value_gap_pct).filter(v => v != null && Math.abs(v) <= 60);
+  const xmin = -60, xmax = 60;
+  const x = v => padL + ((Math.max(xmin, Math.min(xmax, v)) - xmin) / (xmax - xmin)) * (W - padL - padR);
+  const y = v => padT + (1 - v / 100) * (H - padT - padB);
+  const colors = { "LISTING GOLDMINE": "var(--s1)", "CATCH-UP BUY": "var(--s2)", "BUYER LEVERAGE": "var(--s3)" };
+  document.getElementById("scatterLegend").innerHTML =
+    Object.entries({ "Listing goldmine": "--s1", "Catch-up buy": "--s2", "Buyer leverage": "--s3" })
+      .map(([k,v]) => `<span class="key"><span class="swatch" style="background:var(${v})"></span>${k}</span>`)
+      .join("") + `<span class="key"><span class="swatch" style="background:var(--muted);opacity:.55"></span>No flag</span>`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="min-width:700px" role="img" aria-label="Heat index vs value gap scatter">`;
+  for (const g of [0,25,50,75,100])
+    s += `<line x1="${padL}" y1="${y(g)}" x2="${W-padR}" y2="${y(g)}" stroke="var(--grid)"/>
+          <text x="${padL-8}" y="${y(g)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${g}</text>`;
+  for (const g of [-60,-40,-20,0,20,40,60])
+    s += `<text x="${x(g)}" y="${H-20}" text-anchor="middle" font-size="11" fill="var(--muted)">${g>0?"+"+g:g}%</text>`;
+  s += `<line x1="${x(0)}" y1="${padT}" x2="${x(0)}" y2="${H-padB}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s += `<text x="${padL}" y="${H-4}" font-size="12" fill="var(--ink-2)">← appreciated less than metro (cheap side)</text>
+        <text x="${W-padR}" y="${H-4}" text-anchor="end" font-size="12" fill="var(--ink-2)">appreciated more than metro →</text>
+        <text x="${padL+4}" y="${padT+12}" font-size="12" fill="var(--ink-2)">hot demand ↑</text>`;
+  const pts = zips.filter(z => z.value_gap_pct != null);
+  pts.sort((a,b) => (a.flag?1:0) - (b.flag?1:0));
+  let labels = "";
+  pts.forEach((z, i) => {
+    const fill = z.flag ? colors[z.flag] : "var(--muted)";
+    const r = z.homes_sold_3m_avg >= 10 ? 7 : 4.5;
+    s += `<circle class="pt" data-z="${z.zip}" cx="${x(z.value_gap_pct)}" cy="${y(z.heat_index)}" r="${r}"
+      fill="${fill}" opacity="${z.flag ? 0.95 : 0.5}" stroke="var(--surface)" stroke-width="2"/>`;
+    if (z.flag && z.homes_sold_3m_avg >= 10)
+      labels += `<text x="${x(z.value_gap_pct)}" y="${y(z.heat_index)-11}" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)">${z.zip}</text>`;
+  });
+  s += labels + `</svg>`;
+  const host = document.getElementById("scatterChart");
+  host.innerHTML = s;
+  host.querySelectorAll(".pt").forEach(c => {
+    const z = zips.find(q => q.zip === c.dataset.z);
+    c.addEventListener("mousemove", e => showTip(e, zipTip(z)));
+    c.addEventListener("mouseleave", hideTip);
+  });
+})();
+
+/* ---------- 3: momentum diverging bars ---------- */
+(function momo() {
+  const rows = solid.filter(z => z.heat_momentum != null)
+    .sort((a,b) => b.heat_momentum - a.heat_momentum);
+  const W = 980, rowH = 24, padL = 300, padR = 60, H = rows.length * rowH + 30;
+  const ext = Math.max(...rows.map(z => Math.abs(z.heat_momentum)));
+  const x = v => padL + ((v + ext) / (2*ext)) * (W - padL - padR);
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="min-width:760px" role="img" aria-label="Heat momentum by ZIP">`;
+  s += `<line x1="${x(0)}" y1="12" x2="${x(0)}" y2="${H-16}" stroke="var(--axis)" stroke-width="1.5"/>`;
+  s += `<text x="${x(0)-8}" y="${H-2}" text-anchor="end" font-size="11" fill="var(--muted)">cooling ←</text>
+        <text x="${x(0)+8}" y="${H-2}" font-size="11" fill="var(--muted)">→ heating</text>`;
+  rows.forEach((z, i) => {
+    const yy = 16 + i * rowH, bh = rowH - 8;
+    const v = z.heat_momentum, warm = v >= 0;
+    const x0 = warm ? x(0) : x(v), w = Math.max(Math.abs(x(v) - x(0)), 10);
+    const rx = 4;
+    const path = warm
+      ? `M${x0},${yy} h${w-rx} a${rx},${rx} 0 0 1 ${rx},${rx} v${bh-2*rx} a${rx},${rx} 0 0 1 -${rx},${rx} h-${w-rx} z`
+      : `M${x0+rx},${yy} h${w-rx} v${bh} h-${w-rx} a${rx},${rx} 0 0 1 -${rx},-${rx} v-${bh-2*rx} a${rx},${rx} 0 0 1 ${rx},-${rx} z`;
+    s += `<g class="mband" data-z="${z.zip}">
+      <rect x="0" y="${yy-4}" width="${W}" height="${rowH}" fill="transparent"/>
+      <text x="${padL-10}" y="${yy + bh/2 + 4}" text-anchor="end" font-size="12.5" fill="var(--ink)">${z.zip}<tspan fill="var(--muted)"> · ${(z.area||"").replace(/ \(.*\)/,"")}</tspan></text>
+      <path d="${path}" fill="${warm ? "var(--div-warm)" : "var(--div-cool)"}"/>
+      <text x="${warm ? x(v)+5 : x(v)-5}" y="${yy + bh/2 + 4}" ${warm ? "" : 'text-anchor="end"'} font-size="11.5" font-weight="600" fill="var(--ink)">${(v>0?"+":"")+v}</text></g>`;
+  });
+  s += `</svg>`;
+  const host = document.getElementById("momoChart");
+  host.innerHTML = s;
+  host.querySelectorAll(".mband").forEach(g => {
+    const z = solid.find(q => q.zip === g.dataset.z);
+    g.addEventListener("mousemove", e => showTip(e, zipTip(z)));
+    g.addEventListener("mouseleave", hideTip);
+  });
+})();
+
+/* ---------- 4: locality trend lines ---------- */
+(function trends() {
+  const T = DATA.locality_trends || {};
+  const names = Object.keys(T);
+  if (!names.length) return;
+  const slots = ["--s1","--s2","--s3","--s4"];
+  document.getElementById("trendLegend").innerHTML = names.map((n,i) =>
+    `<span class="key"><span class="swatch" style="background:var(${slots[i]})"></span>${n}</span>`).join("");
+  const W = 940, H = 380, padL = 58, padR = 150, padT = 14, padB = 34;
+  const months = T[names[0]].months;
+  const smooth = a => a.map((v, i) => {
+    const win = a.slice(Math.max(0, i-2), i+1).filter(q => q != null);
+    return v == null ? null : win.reduce((s,q) => s+q, 0) / win.length;
+  });
+  const S = {}; names.forEach(n => S[n] = smooth(T[n].median_sale_price));
+  const all = names.flatMap(n => S[n]).filter(v => v != null);
+  const ymin = Math.floor(Math.min(...all)/50000)*50000, ymax = Math.ceil(Math.max(...all)/50000)*50000;
+  const x = i => padL + (i / (months.length - 1)) * (W - padL - padR);
+  const y = v => padT + (1 - (v - ymin) / (ymax - ymin)) * (H - padT - padB);
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="min-width:700px" role="img" aria-label="Median sale price by locality over time">`;
+  for (let g = ymin; g <= ymax; g += 50000)
+    s += `<line x1="${padL}" y1="${y(g)}" x2="${W-padR}" y2="${y(g)}" stroke="var(--grid)"/>
+          <text x="${padL-8}" y="${y(g)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${moneyK(g)}</text>`;
+  const yearTicks = months.map((m,i)=>({m,i})).filter(o => o.m.endsWith("-01-01"));
+  for (const o of yearTicks)
+    s += `<text x="${x(o.i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">${o.m.slice(0,4)}</text>`;
+  const ends = [];
+  names.forEach((n, si) => {
+    const vals = S[n];
+    let d = "", started = false;
+    vals.forEach((v, i) => {
+      if (v == null) return;
+      d += (started ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1);
+      started = true;
+    });
+    s += `<path d="${d}" fill="none" stroke="var(${slots[si]})" stroke-width="2" stroke-linejoin="round"/>`;
+    const last = vals.map((v,i)=>({v,i})).filter(o=>o.v!=null).pop();
+    s += `<circle cx="${x(last.i)}" cy="${y(last.v)}" r="4" fill="var(${slots[si]})" stroke="var(--surface)" stroke-width="2"/>`;
+    ends.push({ n, si, xi: last.i, yv: y(last.v), v: last.v });
+  });
+  // dodge end labels: sort by y, enforce 16px min separation
+  ends.sort((a,b) => a.yv - b.yv);
+  for (let i = 1; i < ends.length; i++)
+    if (ends[i].yv - ends[i-1].yv < 16) ends[i].yv = ends[i-1].yv + 16;
+  for (const e of ends)
+    s += `<text x="${x(e.xi)+9}" y="${e.yv+4}" font-size="11.5" font-weight="600" fill="var(--ink)">${e.n} ${moneyK(e.v)}</text>`;
+  s += `<line id="xhair" x1="0" x2="0" y1="${padT}" y2="${H-padB}" stroke="var(--axis)" stroke-width="1" opacity="0"/>
+        <rect id="trendHit" x="${padL}" y="${padT}" width="${W-padL-padR}" height="${H-padT-padB}" fill="transparent"/></svg>`;
+  const host = document.getElementById("trendChart");
+  host.innerHTML = s;
+  const svg = host.querySelector("svg"), hit = host.querySelector("#trendHit"), xh = host.querySelector("#xhair");
+  hit.addEventListener("mousemove", e => {
+    const r = svg.getBoundingClientRect();
+    const sx = (e.clientX - r.left) * (W / r.width);
+    const i = Math.max(0, Math.min(months.length-1, Math.round((sx - padL) / (W - padL - padR) * (months.length - 1))));
+    xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("opacity", "1");
+    const rowsHtml = names.map((n, si) => {
+      const v = T[n].median_sale_price[i];
+      return `<div class="t-row"><span><span class="swatch" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(${slots[si]});margin-right:5px"></span>${n}</span><b>${v==null?"—":money(v)}</b></div>`;
+    }).join("");
+    showTip(e, `<div class="t-head">${months[i].slice(0,7)}</div>` + rowsHtml);
+  });
+  hit.addEventListener("mouseleave", () => { xh.setAttribute("opacity","0"); hideTip(); });
+})();
+
+/* ---------- 5: sortable table ---------- */
+(function table() {
+  const cols = [
+    ["zip","ZIP"], ["area","Area"], ["heat_index","Heat"], ["heat_momentum","Δ Heat 1y"],
+    ["median_sale_price","Median price"], ["price_yoy_pct","Price YoY"],
+    ["median_dom","DOM"], ["sale_to_list_pct","Sale/list"], ["sold_above_list_pct","Above list"],
+    ["appreciation_5y_pct","5-yr appr."], ["homes_sold_3m_avg","Sales/mo"], ["flag","Flag"],
+  ];
+  const host = document.getElementById("zipTable");
+  let sortKey = "heat_index", desc = true;
+  const chip = f => f === "LISTING GOLDMINE" ? '<span class="chip gold">GOLDMINE</span>'
+    : f === "CATCH-UP BUY" ? '<span class="chip catch">CATCH-UP</span>'
+    : f === "BUYER LEVERAGE" ? '<span class="chip lev">LEVERAGE</span>' : "";
+  function render() {
+    const rows = [...zips].sort((a,b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      if (av == null) return 1; if (bv == null) return -1;
+      const c = typeof av === "string" ? av.localeCompare(bv) : av - bv;
+      return desc ? -c : c;
+    });
+    host.innerHTML = "<thead><tr>" + cols.map(([k,l]) =>
+      `<th tabindex="0" data-k="${k}">${l}${k===sortKey ? (desc?" ↓":" ↑") : ""}</th>`).join("") + "</tr></thead>" +
+      "<tbody>" + rows.map(z => `<tr>
+        <td><b>${z.zip}</b></td>
+        <td>${z.area || ""}${z.homes_sold_3m_avg < 10 ? ' <span class="thin-note">thin</span>' : ""}</td>
+        <td><b>${z.heat_index ?? "—"}</b></td>
+        <td>${z.heat_momentum == null ? "—" : (z.heat_momentum>0?"+":"")+z.heat_momentum}</td>
+        <td>${money(z.median_sale_price)}</td><td>${pct(z.price_yoy_pct)}</td>
+        <td>${n1(z.median_dom)}</td><td>${pct(z.sale_to_list_pct)}</td>
+        <td>${pct(z.sold_above_list_pct)}</td><td>${pct(z.appreciation_5y_pct)}</td>
+        <td>${n1(z.homes_sold_3m_avg)}</td><td style="text-align:left">${chip(z.flag)}</td></tr>`).join("") + "</tbody>";
+    host.querySelectorAll("th").forEach(th => {
+      const go = () => { const k = th.dataset.k;
+        if (k === sortKey) desc = !desc; else { sortKey = k; desc = true; } render(); };
+      th.addEventListener("click", go);
+      th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    });
+  }
+  render();
+})();
+
+/* ---------- playbook fills ---------- */
+(function playbook() {
+  const pick = f => zips.filter(z => z.flag === f && z.homes_sold_3m_avg >= 10)
+    .sort((a,b) => b.heat_index - a.heat_index);
+  const g = pick("LISTING GOLDMINE"), c = pick("CATCH-UP BUY"), l = pick("BUYER LEVERAGE");
+  const list = a => a.slice(0,6).map(z => z.zip).join(" · ");
+  document.getElementById("goldList").textContent = list(g);
+  document.getElementById("catchList").textContent = list(c);
+  document.getElementById("levList").textContent = list(l);
+  if (g[0]) document.getElementById("goldScript").innerHTML =
+    `Say this at the door in ${g[0].zip}: "Homes in ${g[0].area.replace(/ \(.*\)/,"")} are selling in
+    <b>${n1(g[0].median_dom)} days</b> at <b>${pct(g[0].sale_to_list_pct)} of asking</b> —
+    ${pct(g[0].sold_above_list_pct)} go over. Want to know what that means for yours?"`;
+  if (c[0]) document.getElementById("catchScript").innerHTML =
+    `Investor pitch for ${c[0].zip}: "Demand ranks ${c[0].heat_index}/100 in the metro but it's
+    appreciated <b>${Math.abs(c[0].value_gap_pct).toFixed(0)} pts less</b> than the metro over 5 years —
+    heat arrived before the price did."`;
+  if (l[0]) document.getElementById("levScript").innerHTML =
+    `Buyer consult for ${l[0].zip}: "This ZIP cooled <b>${Math.abs(l[0].heat_momentum)} points</b>
+    in a year — we can offer under ask and negotiate concessions here. The data backs us."`;
+})();
+</script>
