@@ -26,6 +26,6 @@ Note: these are single-file deploys with no server-side redirects, so the guide 
 
 ## Architecture notes
 
-- **01-flagship** — cinematic dark editorial site. Hand-rolled WebGL particle engine (no libraries): ~14k points morphing between seven generated forms, scroll-driven, with per-shape rotation modes and per-section offset/dim. Instrument Serif / Instrument Sans / Fragment Mono.
-- **02-showcase** — Swiss-tactile light "lab" with three working demos: a scripted booking chatbot (intent matcher + multi-step flow), a live-ticking canvas dashboard (crosshair tooltips, target reference line, AI narration), and a personal-CRM demo (warmth scoring, stage pipeline, typewriter-drafted follow-ups). Bricolage Grotesque / Archivo / Spline Sans Mono; chart colors from a validated data-viz palette.
+- **01-flagship** — cinematic dark editorial site. Hand-rolled WebGL particle engine (no libraries): ~14k points morphing between seven generated forms, scroll-driven, with per-shape rotation modes and per-section offset/dim. Type: Sorts Mill Goudy (Goudy Oldstyle revival) / Alegreya Sans / Courier Prime.
+- **02-showcase** — Swiss-tactile light "lab" with three working demos: a scripted booking chatbot (intent matcher + multi-step flow), a live-ticking canvas dashboard (crosshair tooltips, target reference line, AI narration), and a personal-CRM demo (warmth scoring, stage pipeline, typewriter-drafted follow-ups). Type: Besley (Clarendon revival) for display / Libre Franklin for body+UI / IBM Plex Mono for data; chart colors from a validated data-viz palette.
 - Both honor `prefers-reduced-motion`, ship OG tags + inline SVG favicons, and were iterated through 3 screenshot-review passes at 3 viewports (Playwright, headless Chromium).

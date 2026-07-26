@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const here = __dirname;
-const fonts = ['instrument-serif', 'instrument-sans', 'fragment-mono']
+const fonts = ['sorts-mill-goudy', 'alegreya-sans', 'courier-prime']
   .map((f) => fs.readFileSync(path.join(here, '../_assets/fonts', f + '.inline.css'), 'utf8'))
   .join('\n');
 const app = fs.readFileSync(path.join(here, 'app.js'), 'utf8');

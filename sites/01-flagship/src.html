@@ -21,9 +21,9 @@
   --copper:#D98F52;
   --copper-soft:rgba(217,143,82,.14);
   --peri:#8B9AF4;
-  --serif:'Instrument Serif', Georgia, serif;
-  --sans:'Instrument Sans', system-ui, sans-serif;
-  --mono:'Fragment Mono', ui-monospace, monospace;
+  --serif:'Sorts Mill Goudy', Georgia, serif;
+  --sans:'Alegreya Sans', system-ui, sans-serif;
+  --mono:'Courier Prime', ui-monospace, monospace;
   --gutter:clamp(20px, 5vw, 96px);
   --ease-out:cubic-bezier(.19,1,.22,1);
 }
@@ -80,8 +80,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--copper);outline-off
 }
 .nav.scrolled{background:rgba(10,14,26,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .wordmark{display:flex;flex-direction:column;line-height:1.15}
-.wordmark b{font-family:var(--serif);font-weight:400;font-size:20px;letter-spacing:.01em}
-.wordmark span{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;margin-top:2px}
+.wordmark b{font-family:var(--serif);font-weight:400;font-size:21px;letter-spacing:.01em}
+.wordmark span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-top:2px}
 .nav-links{display:flex;gap:34px;align-items:center;font-size:14px;letter-spacing:.02em}
 .nav-links a{color:var(--mist);position:relative;padding:4px 0;transition:color .25s}
 .nav-links a:hover{color:var(--paper)}
@@ -115,7 +115,7 @@ section{position:relative}
 }
 
 /* line mask reveal for display type */
-.lm{display:block;overflow:hidden;padding-block:.06em;margin-block:-.06em}
+.lm{display:block;overflow:hidden;padding-block:.09em;margin-block:-.09em}
 .lm > span{display:block;transform:translateY(115%);transition:transform 1.1s var(--ease-out)}
 .in .lm > span, .lm.in > span{transform:none}
 .lm:nth-child(2) > span{transition-delay:.1s}
@@ -128,8 +128,8 @@ section{position:relative}
 .hero h1{
   font-family:var(--serif);font-weight:400;
   font-size:clamp(52px, 10.5vw, 150px);
-  line-height:.98;letter-spacing:-.015em;text-wrap:balance;
-  margin:26px 0 30px;
+  line-height:1.04;letter-spacing:-.005em;text-wrap:balance;
+  margin:22px 0 28px;
 }
 .hero h1 em{font-style:italic;color:var(--copper)}
 .hero .sub{
@@ -173,7 +173,7 @@ section{position:relative}
 .thesis{padding:clamp(110px,16vh,200px) 0}
 .thesis p{
   font-family:var(--serif);font-weight:400;
-  font-size:clamp(28px,4.3vw,54px);line-height:1.22;letter-spacing:-.01em;
+  font-size:clamp(28px,4.3vw,54px);line-height:1.26;letter-spacing:0;
   max-width:20em;text-wrap:balance;
 }
 .thesis p em{font-style:italic;color:var(--copper)}
@@ -201,7 +201,7 @@ section{position:relative}
 .panel-copy .code b{color:var(--copper);font-weight:400}
 .panel-copy h3{
   font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.6vw,76px);
-  line-height:1.02;letter-spacing:-.015em;margin-bottom:24px;text-wrap:balance;
+  line-height:1.08;letter-spacing:-.005em;margin-bottom:24px;text-wrap:balance;
 }
 .panel-copy h3 em{font-style:italic;color:var(--copper)}
 .panel-copy p{color:var(--mist);max-width:32em;margin-bottom:30px}
@@ -250,7 +250,7 @@ section{position:relative}
 .contact{padding:clamp(130px,20vh,240px) 0;border-top:1px solid var(--line);text-align:left}
 .contact h2{
   font-family:var(--serif);font-weight:400;font-size:clamp(48px,9vw,128px);
-  line-height:1;letter-spacing:-.02em;margin:26px 0 40px;text-wrap:balance;
+  line-height:1.06;letter-spacing:-.01em;margin:26px 0 40px;text-wrap:balance;
 }
 .contact h2 em{font-style:italic;color:var(--copper)}
 .contact .mail{
@@ -529,10 +529,12 @@ body.guide-mode #guide{display:block}
 
     <div class="guide-sec">
       <h2>Typography</h2>
+      <p>Three faces with real pedigree, none of them fashionable defaults: a <b>Goudy Oldstyle revival</b> (1915)
+      for display, a humanist sans for the argument, and a typewriter face for the archival voice.</p>
       <div class="type-spec">
-        <div class="row"><span class="demo-serif">Intelligence, <em>installed.</em></span><span class="tag">Instrument Serif · display</span></div>
-        <div class="row"><span class="demo-sans">Body copy carries the argument in a quiet grotesk, sized for a 65-character measure.</span><span class="tag">Instrument Sans · body</span></div>
-        <div class="row"><span class="demo-mono">Catalog codes · labels · data</span><span class="tag">Fragment Mono · utility</span></div>
+        <div class="row"><span class="demo-serif">Intelligence, <em>installed.</em></span><span class="tag">Sorts Mill Goudy · display</span></div>
+        <div class="row"><span class="demo-sans">Body copy carries the argument in a warm humanist sans, sized for a 65-character measure.</span><span class="tag">Alegreya Sans · body</span></div>
+        <div class="row"><span class="demo-mono">Catalog codes · labels · data</span><span class="tag">Courier Prime · utility</span></div>
       </div>
       <p style="margin-top:18px">All three faces are subset to Latin and embedded as base64 — the page makes
       <b>zero external requests</b>.</p>
