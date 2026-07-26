@@ -2,6 +2,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daniel Yoon — AI Implementation Studio</title>
 <meta name="description" content="Daniel Yoon builds AI into the fabric of real businesses — websites, dashboards, software, chatbots, and CRM systems that think.">
+<meta property="og:title" content="Daniel Yoon — AI Implementation Studio">
+<meta property="og:description" content="Intelligence, installed. Websites, dashboards, software, AI chatbots and personal CRMs — built into the fabric of real businesses.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0E1A'/%3E%3Cpath d='M32 10l5.5 16.5L54 32l-16.5 5.5L32 54l-5.5-16.5L10 32l16.5-5.5z' fill='%23D98F52'/%3E%3C/svg%3E">
 <style>
 /*__FONTS__*/
 
@@ -48,6 +52,23 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--copper);outline-off
 .vignette{
   position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(120% 90% at 50% 10%, transparent 40%, rgba(6,9,18,.55) 100%);
+}
+.grain{
+  position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 9s steps(6) infinite;
+}
+@keyframes grain{
+  0%,100%{transform:translate(0,0)} 20%{transform:translate(-6%,4%)} 40%{transform:translate(4%,-7%)}
+  60%{transform:translate(-3%,-5%)} 80%{transform:translate(6%,3%)}
+}
+@media (prefers-reduced-motion: reduce){ .grain{animation:none} }
+.progress{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:60;pointer-events:none;
+}
+.progress i{
+  display:block;height:100%;background:linear-gradient(90deg,var(--copper),var(--peri));
+  transform-origin:0 50%;transform:scaleX(0);
 }
 
 /* ---------- nav ---------- */
@@ -140,7 +161,11 @@ section{position:relative}
   font-family:var(--serif);font-size:30px;font-style:italic;color:var(--mist);
   padding:0 28px;display:inline-flex;align-items:center;gap:56px;
 }
-.marquee span::after{content:'✦';font-size:14px;color:var(--copper);font-style:normal}
+.marquee span:nth-child(even){
+  font-style:normal;color:transparent;
+  -webkit-text-stroke:1px rgba(154,164,200,.55);
+}
+.marquee span::after{content:'✦';font-size:14px;color:var(--copper);font-style:normal;-webkit-text-stroke:0}
 @keyframes slide{to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion: reduce){ .marquee .track{animation:none} }
 
@@ -197,8 +222,13 @@ section{position:relative}
 .process{padding:clamp(110px,16vh,190px) 0;border-top:1px solid var(--line)}
 .process h2{font-family:var(--serif);font-weight:400;font-size:clamp(36px,5vw,64px);margin:22px 0 60px;letter-spacing:-.01em}
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line)}
-.step{background:var(--ink);padding:30px 22px 40px;position:relative;transition:background .4s}
+.step{background:var(--ink);padding:30px 22px 40px;position:relative;transition:background .4s;overflow:hidden}
+.step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--copper);
+  transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease-out);
+}
 .step:hover{background:var(--deep)}
+.step:hover::before{transform:scaleX(1)}
 .step .n{font-family:var(--mono);font-size:11px;color:var(--copper);letter-spacing:.18em}
 .step h4{font-family:var(--serif);font-weight:400;font-size:24px;margin:16px 0 10px}
 .step p{color:var(--mist);font-size:14.5px;line-height:1.55}
@@ -284,6 +314,8 @@ body.guide-mode #guide{display:block}
 
 <canvas id="stage" aria-hidden="true"></canvas>
 <div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
 
 <header class="nav" id="nav">
   <a class="wordmark" href="/" data-route="home" aria-label="Daniel Yoon — home">
@@ -295,7 +327,7 @@ body.guide-mode #guide{display:block}
     <a href="#process" data-scroll>Process</a>
     <a href="#results" data-scroll>Results</a>
     <a href="#contact" data-scroll>Contact</a>
-    <a href="/guide" class="guide-pill" data-route="guide">Guide</a>
+    <a href="#/guide" class="guide-pill" data-route="guide">Guide</a>
   </nav>
 </header>
 
@@ -460,7 +492,7 @@ body.guide-mode #guide{display:block}
 
 <footer class="site-footer">
   <span>© 2026 Daniel Yoon</span>
-  <a href="/guide" data-route="guide">Design &amp; build guide</a>
+  <a href="#/guide" data-route="guide">Design &amp; build guide</a>
   <span>Hand-built · Zero templates</span>
 </footer>
 
@@ -522,7 +554,7 @@ body.guide-mode #guide{display:block}
         <li>One self-contained HTML file — fonts, styles, and the WebGL engine inlined. No CDNs, no build dependencies at runtime.</li>
         <li>Custom GLSL vertex/fragment shaders; positions blended on-GPU, buffers swapped CPU-side at section boundaries to avoid pops.</li>
         <li>Particle count adapts to device (≈14k desktop / ≈7k mobile); DPR capped at 2 for battery sanity.</li>
-        <li>Client-side router serves this /guide view for both path and hash navigation.</li>
+        <li>Client-side router serves this guide view — hash-canonical (<b>#/guide</b>) so links survive refresh on static hosting, with path-based /guide handled when the host allows it.</li>
       </ul>
       <a class="back-home" href="/" data-route="home">← Back to the site</a>
     </div>

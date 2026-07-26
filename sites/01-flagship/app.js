@@ -11,11 +11,11 @@ function setRoute(guide) {
   window.scrollTo(0, 0);
 }
 function navigate(guide) {
-  try {
-    const base = location.pathname.replace(/guide\/?$/, '');
-    history.pushState({}, '', guide ? base.replace(/\/?$/, '/') + 'guide' : base || '/');
-  } catch (e) {
-    location.hash = guide ? '#/guide' : '';
+  // hash-canonical: refresh-safe on static single-file hosting
+  if (guide) location.hash = '#/guide';
+  else {
+    try { history.pushState({}, '', location.pathname.replace(/guide\/?$/, '') || '/'); }
+    catch (e) { location.hash = ''; }
   }
   setRoute(guide);
 }
@@ -35,9 +35,14 @@ addEventListener('popstate', () => setRoute(isGuidePath()));
 addEventListener('hashchange', () => setRoute(isGuidePath()));
 setRoute(isGuidePath());
 
-/* ---------- nav background ---------- */
+/* ---------- nav background + scroll progress ---------- */
 const nav = document.getElementById('nav');
-addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
+const progressBar = document.getElementById('progressBar');
+addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 40);
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progressBar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
+}, { passive: true });
 
 /* ---------- marquee: duplicate for seamless loop ---------- */
 const track = document.getElementById('marqueeTrack');
