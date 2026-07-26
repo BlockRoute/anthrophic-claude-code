@@ -339,8 +339,8 @@ void main(){
 
   const U = {};
   ['uT','uTime','uAspect','uSize','uDrift','uOffN','uRot','uColA','uColB','uAlpha'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
-  gl.uniform3f(U.uColA, 0.87, 0.58, 0.34);   // copper
-  gl.uniform3f(U.uColB, 0.55, 0.61, 0.96);   // periwinkle
+  gl.uniform3f(U.uColA, 0.84, 0.67, 0.38);   // antique gold
+  gl.uniform3f(U.uColB, 0.53, 0.61, 0.70);   // moonlit slate
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
   gl.disable(gl.DEPTH_TEST);

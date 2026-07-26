@@ -5,22 +5,22 @@
 <meta property="og:title" content="Daniel Yoon — AI Implementation Studio">
 <meta property="og:description" content="Intelligence, installed. Websites, dashboards, software, AI chatbots and personal CRMs — built into the fabric of real businesses.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0E1A'/%3E%3Cpath d='M32 10l5.5 16.5L54 32l-16.5 5.5L32 54l-5.5-16.5L10 32l16.5-5.5z' fill='%23D98F52'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111417'/%3E%3Cpath d='M32 10l5.5 16.5L54 32l-16.5 5.5L32 54l-5.5-16.5L10 32l16.5-5.5z' fill='%23C9A45C'/%3E%3C/svg%3E">
 <style>
 /*__FONTS__*/
 
 :root{
-  --ink:#0A0E1A;
-  --deep:#121930;
-  --raise:#161E38;
-  --line:rgba(151,161,196,.16);
-  --line-strong:rgba(151,161,196,.32);
-  --mist:#9AA4C8;
-  --dim:#6A7396;
-  --paper:#EEF0F8;
-  --copper:#D98F52;
-  --copper-soft:rgba(217,143,82,.14);
-  --peri:#8B9AF4;
+  --ink:#111417;
+  --deep:#191D21;
+  --raise:#20252A;
+  --line:rgba(196,193,178,.15);
+  --line-strong:rgba(196,193,178,.30);
+  --mist:#A4A79B;
+  --dim:#75786C;
+  --paper:#F1EEE3;
+  --copper:#C9A45C;
+  --copper-soft:rgba(201,164,92,.14);
+  --peri:#8195A9;
   --serif:'Sorts Mill Goudy', Georgia, serif;
   --sans:'Alegreya Sans', system-ui, sans-serif;
   --mono:'Courier Prime', ui-monospace, monospace;
@@ -51,7 +51,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--copper);outline-off
 }
 .vignette{
   position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 10%, transparent 40%, rgba(6,9,18,.55) 100%);
+  background:radial-gradient(120% 90% at 50% 10%, transparent 40%, rgba(10,11,10,.55) 100%);
 }
 .grain{
   position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.05;
@@ -78,7 +78,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--copper);outline-off
   padding:22px var(--gutter);
   transition:background .4s, backdrop-filter .4s;
 }
-.nav.scrolled{background:rgba(10,14,26,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav.scrolled{background:rgba(15,17,19,.74);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .wordmark{display:flex;flex-direction:column;line-height:1.15}
 .wordmark b{font-family:var(--serif);font-weight:400;font-size:21px;letter-spacing:.01em}
 .wordmark span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-top:2px}
@@ -154,7 +154,7 @@ section{position:relative}
 .marquee{
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   padding:20px 0;overflow:hidden;white-space:nowrap;
-  background:rgba(10,14,26,.4);backdrop-filter:blur(4px);
+  background:rgba(15,17,19,.4);backdrop-filter:blur(4px);
 }
 .marquee .track{display:inline-flex;gap:0;animation:slide 36s linear infinite;will-change:transform}
 .marquee span{
@@ -264,7 +264,7 @@ section{position:relative}
 .next-site{
   margin-top:80px;padding:30px 34px;border:1px solid var(--line);border-radius:16px;
   display:flex;justify-content:space-between;align-items:center;gap:20px;max-width:640px;
-  background:rgba(18,25,48,.5);backdrop-filter:blur(8px);
+  background:rgba(25,29,33,.5);backdrop-filter:blur(8px);
   transition:border-color .35s, transform .35s var(--ease-out);
 }
 .next-site:hover{border-color:rgba(217,143,82,.5);transform:translateY(-3px)}
@@ -273,7 +273,7 @@ section{position:relative}
 .next-site .go{font-family:var(--mono);font-size:12px;color:var(--copper);letter-spacing:.12em;white-space:nowrap}
 
 /* ---------- footer ---------- */
-footer{border-top:1px solid var(--line);padding:34px var(--gutter);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:2;background:rgba(10,14,26,.6)}
+footer{border-top:1px solid var(--line);padding:34px var(--gutter);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:2;background:rgba(15,17,19,.6)}
 footer, footer a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 footer a:hover{color:var(--copper)}
 
@@ -514,16 +514,16 @@ body.guide-mode #guide{display:block}
 
     <div class="guide-sec">
       <h2>Palette</h2>
-      <p>Cinematic single-theme dark — a deliberate commitment, not a default. The ground is a deep indigo
-      (never pure black), the accent is copper — the metal of wiring, of craft — with periwinkle reserved
-      almost exclusively for the particles.</p>
+      <p>Iron-gall ink and gold leaf — the palette of a bound book, chosen to outlast trends. The ground is a
+      warm soft-black (never pure), the text is ivory, the accent is <b>antique gold</b>, and a moonlit slate
+      is reserved almost exclusively for the particles.</p>
       <div class="swatches">
-        <div class="swatch"><div class="chip" style="background:#0A0E1A"></div><div class="info"><b>Ink</b>#0A0E1A · ground</div></div>
-        <div class="swatch"><div class="chip" style="background:#121930"></div><div class="info"><b>Deep</b>#121930 · surfaces</div></div>
-        <div class="swatch"><div class="chip" style="background:#EEF0F8"></div><div class="info"><b>Paper</b>#EEF0F8 · text</div></div>
-        <div class="swatch"><div class="chip" style="background:#9AA4C8"></div><div class="info"><b>Mist</b>#9AA4C8 · secondary</div></div>
-        <div class="swatch"><div class="chip" style="background:#D98F52"></div><div class="info"><b>Copper</b>#D98F52 · accent</div></div>
-        <div class="swatch"><div class="chip" style="background:#8B9AF4"></div><div class="info"><b>Periwinkle</b>#8B9AF4 · particles</div></div>
+        <div class="swatch"><div class="chip" style="background:#111417"></div><div class="info"><b>Ink</b>#111417 · ground</div></div>
+        <div class="swatch"><div class="chip" style="background:#191D21"></div><div class="info"><b>Deep</b>#191D21 · surfaces</div></div>
+        <div class="swatch"><div class="chip" style="background:#F1EEE3"></div><div class="info"><b>Ivory</b>#F1EEE3 · text</div></div>
+        <div class="swatch"><div class="chip" style="background:#A4A79B"></div><div class="info"><b>Stone</b>#A4A79B · secondary</div></div>
+        <div class="swatch"><div class="chip" style="background:#C9A45C"></div><div class="info"><b>Gold</b>#C9A45C · accent</div></div>
+        <div class="swatch"><div class="chip" style="background:#8195A9"></div><div class="info"><b>Slate</b>#8195A9 · particles</div></div>
       </div>
     </div>
 

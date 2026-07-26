@@ -362,7 +362,7 @@ function toast(html) {
 
 /* ================= STATION 3 — Orbit ================= */
 (function crm() {
-  const AV = ['#2a78d6', '#eb6834', '#1baf7a', '#4a3aa7', '#e87ba4'];
+  const AV = ['#8E2F26', '#B98122', '#3D5A46', '#33475C', '#7A4A63'];
   const STAGES = ['Reconnect', 'In conversation', 'Committed'];
   const PEOPLE = [
     { id: 0, name: 'Maya Okafor', role: 'Owner · Okafor Physio', stage: 1, warm: 'hot', score: 86,
