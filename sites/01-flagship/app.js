@@ -1,5 +1,5 @@
 'use strict';
-/* ============ Daniel Yoon — flagship engine ============ */
+/* ============ Daniel Yoon flagship engine ============ */
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- router (path + hash, /guide) ---------- */

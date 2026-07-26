@@ -1,5 +1,5 @@
 'use strict';
-/* ============ The Yoon Lab — engine ============ */
+/* ============ The Yoon Lab engine ============ */
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (s, r) => (r || document).querySelector(s);
 
@@ -48,7 +48,7 @@ function toast(html) {
   toastT = setTimeout(() => t.classList.remove('show'), 3400);
 }
 
-/* ================= STATION 1 — Concierge ================= */
+/* ================= STATION 1: Concierge ================= */
 (function chatbot() {
   const log = $('#chatLog'), chipsEl = $('#chips'), form = $('#chatForm'), input = $('#chatInput');
   const scrollLog = () => { log.scrollTop = log.scrollHeight; };
@@ -128,33 +128,33 @@ function toast(html) {
     if (flow === 'name') {
       const name = t.replace(/[^a-z\s'-]/gi, '').trim().split(/\s+/).map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : '').join(' ') || 'Guest';
       flow = null;
-      botSay(`All set, ${name}! 🎉<span class="conf">CONFIRMED — Cleaning · ${booking.day} · ${booking.time} · Dr. Park<br>A reminder will text you the day before.</span>Anything else I can help with?`,
+      botSay(`All set, ${name}! 🎉<span class="conf">CONFIRMED · Cleaning · ${booking.day} · ${booking.time} · Dr. Park<br>A reminder will text you the day before.</span>Anything else I can help with?`,
         [['💳 Insurance?', 'Do you take my insurance?'], ['🕐 Hours', 'What are your hours?'], ['🔁 Start over', 'Book a cleaning']], 900);
-      toast('Concierge just <b>booked an appointment</b> — that’s the demo. In production this writes to your real calendar.');
+      toast('Concierge just <b>booked an appointment</b>. In the real version this writes straight to your calendar.');
       return;
     }
     // intents
     if (/(book|appoint|schedule|cleaning|visit|checkup|check-up)/.test(t)) {
       flow = 'day'; booking = {};
-      botSay('Happy to! I checked the calendar — the next openings for a cleaning are:', DAYS.map((d) => [d, d]));
+      botSay('Happy to! I checked the calendar, and the next openings for a cleaning are:', DAYS.map((d) => [d, d]));
     } else if (/(ouch|pain|hurt|emergency|broke|chipped|swollen|bleed)/.test(t)) {
       flow = null;
-      botSay('That sounds urgent — I’m skipping the script. ☎️ <b>Call us right now at (555) 014-2200</b> and press 1; Dr. Park keeps two same-day slots for emergencies. If it’s after hours, the recording gives the on-call line.',
+      botSay('That sounds urgent, so I’ll skip the script. ☎️ <b>Call us right now at (555) 014-2200</b> and press 1. Dr. Park keeps two same-day slots for emergencies, and after hours the recording gives you the on-call line.',
         [['📅 Book a regular visit', 'Book a cleaning'], ['🕐 Hours', 'What are your hours?']], 500);
     } else if (/(insurance|delta|aetna|cigna|metlife|coverage|in-network)/.test(t)) {
-      botSay('We’re in-network with <b>Delta Dental, Aetna, Cigna and MetLife</b>, and we file out-of-network claims for everyone else. Bring your member ID and we verify benefits before you’re in the chair — no surprise bills.');
+      botSay('We’re in-network with <b>Delta Dental, Aetna, Cigna and MetLife</b>, and we file out-of-network claims for everyone else. Bring your member ID and we’ll verify benefits before you’re in the chair, so there are no surprise bills.');
     } else if (/(price|cost|much|fee|pay)/.test(t)) {
-      botSay('Straight answers: a <b>cleaning + exam is $129</b> (new patients $99, includes X-rays). Whitening runs $349, and we show every price before treatment — always.');
+      botSay('Happy to give straight answers. A <b>cleaning and exam is $129</b>, or $99 for new patients including X-rays. Whitening runs $349. You’ll always see the price before treatment starts.');
     } else if (/(hour|open|close|location|address|where|parking)/.test(t)) {
-      botSay('We’re at <b>410 Juniper Row, Vienna VA</b> — free parking behind the building. Open <b>Mon–Fri 8am–6pm, Sat 9am–1pm</b>. Tuesdays we stay late until 8pm for the 9-to-5 crowd.');
+      botSay('We’re at <b>410 Juniper Row, Vienna VA</b>, with free parking behind the building. Open <b>Mon to Fri 8am to 6pm, Sat 9am to 1pm</b>. On Tuesdays we stay open until 8pm for people who work regular hours.');
     } else if (/(human|person|someone|staff|front desk|talk)/.test(t)) {
-      botSay('Of course — you can reach the front desk at <b>(555) 014-2200</b>, Mon–Sat during open hours. Or leave your number and Maria will call you back within the hour.');
+      botSay('Of course. The front desk is at <b>(555) 014-2200</b> during open hours, or leave your number and Maria will call you back within the hour.');
     } else if (/(thank|thanks|great|awesome|cool)/.test(t)) {
-      botSay('Anytime! That’s what I’m here for — 24/7, no coffee required. ☕');
+      botSay('Anytime! I’m here around the clock, no coffee required. ☕');
     } else if (/(hi|hello|hey)\b/.test(t)) {
       botSay('Hi there! I’m Juniper, the studio’s concierge. I can book visits, check insurance, or answer anything about the practice.');
     } else {
-      botSay('I want to get that exactly right, so I’ve flagged it for the front desk — Maria will follow up within the hour. Meanwhile, I <b>can</b> book visits, check insurance, or share prices and hours.');
+      botSay('I want to get that exactly right, so I’ve flagged it for the front desk, and Maria will follow up within the hour. In the meantime I <b>can</b> book visits, check insurance, or share prices and hours.');
     }
   }
 
@@ -168,11 +168,11 @@ function toast(html) {
 
   // opening
   setTimeout(() => {
-    botSay('Welcome to <b>Juniper Dental Studio</b> 👋 — I’m the after-hours concierge. It’s outside office hours right now, but I can still book you in, check your insurance, or answer questions.', DEFAULT_CHIPS, 500);
+    botSay('Welcome to <b>Juniper Dental Studio</b> 👋 I’m the after-hours assistant. The office is closed right now, but I can still book you in, check your insurance, or answer questions.', DEFAULT_CHIPS, 500);
   }, 800);
 })();
 
-/* ================= STATION 2 — Pulse ================= */
+/* ================= STATION 2: Pulse ================= */
 (function dashboard() {
   const S1 = '#2a78d6', S2 = '#eb6834', GRID = '#e1e0d9', AXIS = '#c3c2b7', MUTED = '#898781', INK = '#101114';
   const DPR = Math.min(devicePixelRatio || 1, 2);
@@ -268,7 +268,7 @@ function toast(html) {
     lTip.style.opacity = 1;
     lTip.style.left = lGeom.X(best) + 'px';
     lTip.style.top = (lGeom.Y(line[best]) + 16) + 'px';
-    lTip.innerHTML = `${hours[best]} — <b>${line[best]} booked</b> · target ${target[best]}`;
+    lTip.innerHTML = `${hours[best]} · <b>${line[best]} booked</b> · target ${target[best]}`;
   });
   lc.addEventListener('pointerleave', () => { lTip.style.opacity = 0; });
 
@@ -311,18 +311,18 @@ function toast(html) {
     bTip.style.opacity = 1;
     bTip.style.left = (e.clientX - r.left) + 'px';
     bTip.style.top = (e.clientY - r.top - 6) + 'px';
-    bTip.innerHTML = `${name} — <b>${v} new patients</b> (${Math.round(v / channels.reduce((a, c) => a + c[1], 0) * 100)}%)`;
+    bTip.innerHTML = `${name} · <b>${v} new patients</b> (${Math.round(v / channels.reduce((a, c) => a + c[1], 0) * 100)}%)`;
   });
   bc.addEventListener('pointerleave', () => { bTip.style.opacity = 0; });
 
   /* ---- narration ---- */
   const narr = $('#narrLine');
   const NARR = [
-    () => `11:0${Math.floor(Math.random() * 9)} — Bookings are running ${line[liveIdx] >= target[liveIdx] ? 'ahead of' : 'just under'} target. ${line[liveIdx] >= target[liveIdx] ? 'The 2pm block is nearly full — consider opening Dr. Park’s hold slots.' : 'The concierge is nudging waitlisted patients toward 2pm.'}`,
-    () => `Referrals are your strongest channel this week (34) — the thank-you automation is due for 6 patients today.`,
-    () => `Response time is down to ${Math.round(tiles[2].val)}s since the concierge went live — before it was 4½ minutes.`,
-    () => `Heads-up: Thursday looks light after 3pm. One targeted recall campaign usually fills 3–4 of those slots.`,
-    () => `Deflection at ${Math.round(tiles[3].val)}% — front desk is answering ${Math.round((1 - tiles[3].val / 100) * 40)} of ~40 daily questions instead of all of them.`,
+    () => `11:0${Math.floor(Math.random() * 9)}: Bookings are running ${line[liveIdx] >= target[liveIdx] ? 'ahead of' : 'just under'} target. ${line[liveIdx] >= target[liveIdx] ? 'The 2pm block is nearly full, so consider opening Dr. Park’s hold slots.' : 'The concierge is nudging waitlisted patients toward 2pm.'}`,
+    () => `Referrals are your strongest channel this week (34). The thank-you automation is due for 6 patients today.`,
+    () => `Response time is down to ${Math.round(tiles[2].val)}s since the concierge went live. It used to be four and a half minutes.`,
+    () => `Heads-up: Thursday looks light after 3pm. One targeted recall campaign usually fills 3 or 4 of those slots.`,
+    () => `Deflection is at ${Math.round(tiles[3].val)}%. The front desk answers ${Math.round((1 - tiles[3].val / 100) * 40)} of about 40 daily questions instead of all of them.`,
   ];
   let ni = 0;
   function typeNarr(text) {
@@ -355,36 +355,36 @@ function toast(html) {
     drawAll();
   }
   drawAll();
-  typeNarr('Live since 8:00am — everything below updates as the (simulated) day unfolds.');
+  typeNarr('Live since 8:00am. Everything below updates as the simulated day unfolds.');
   setInterval(tick, 2500);
   addEventListener('resize', drawAll);
 })();
 
-/* ================= STATION 3 — Orbit ================= */
+/* ================= STATION 3: Orbit ================= */
 (function crm() {
   const AV = ['#8E2F26', '#B98122', '#3D5A46', '#33475C', '#7A4A63'];
   const STAGES = ['Reconnect', 'In conversation', 'Committed'];
   const PEOPLE = [
     { id: 0, name: 'Maya Okafor', role: 'Owner · Okafor Physio', stage: 1, warm: 'hot', score: 86,
-      facts: ['Met at Vienna Biz Breakfast', 'Two kids — Zola & Sam', 'Hates email, loves texts', 'Asked about no-show rates'],
-      last: 'Called 3 days ago — wants the dashboard demo her partner can see.',
-      draft: 'Hi Maya — promised follow-through: here’s a 3-min video of the no-show dashboard using (fake) clinic data. If it clicks, I’ll set up the live version with your numbers next week. Say hi to Zola’s soccer team 🙂' },
+      facts: ['Met at Vienna Biz Breakfast', 'Two kids, Zola and Sam', 'Hates email, loves texts', 'Asked about no-show rates'],
+      last: 'Called 3 days ago. She wants a demo her partner can see too.',
+      draft: 'Hi Maya, as promised: a 3 minute video of the no-show dashboard, running on fake clinic data. If it clicks, I’ll set up a live version with your numbers next week. Say hi to Zola’s soccer team 🙂' },
     { id: 1, name: 'Rob Tran', role: 'GM · Tran Auto Group', stage: 0, warm: 'cool', score: 41,
       facts: ['Last spoke 5 months ago', 'Was mid-renovation then', 'Brother-in-law does his site', 'Big on Costco runs'],
       last: 'Went quiet after the showroom reopened in March.',
-      draft: 'Rob! Saw the showroom reopening photos — the lighting turned out great. No pitch: just curious how the first quarter back has treated you. If service-lane wait times are still the headache, I have something small worth 15 minutes.' },
+      draft: 'Rob! Saw the showroom photos, the lighting turned out great. Not a pitch, just curious how the first quarter back has treated you. If the service lane waits are still a headache, I’ve got something small that’s worth 15 minutes.' },
     { id: 2, name: 'Priya Raman', role: 'Broker · Keystone Realty', stage: 2, warm: 'hot', score: 93,
       facts: ['Signed for concierge + CRM', 'Kickoff next Tuesday', 'Prefers 7am calls', 'Marathon in October'],
       last: 'Contract signed Friday. Kickoff scheduled.',
-      draft: 'Priya — before Tuesday’s kickoff: I’ll bring the intake checklist and the first-week plan. Only homework on your side is exporting the contact CSV (5 minutes, I’ll walk you through it). How’s training week going?' },
+      draft: 'Priya, before Tuesday’s kickoff: I’ll bring the intake checklist and the first week plan. The only homework on your side is exporting the contact CSV, about five minutes, and I’ll walk you through it. How’s training week going?' },
     { id: 3, name: 'Dee Alvarez', role: 'Owner · Deleon Bakery', stage: 1, warm: 'warm', score: 64,
-      facts: ['Referral from Priya', 'Instagram is her whole funnel', 'Opens at 5am — call early', 'Wants catering pre-orders'],
-      last: 'Emailed pricing questions Monday — answered, no reply yet.',
-      draft: 'Hi Dee — following up on the pricing note with something more useful than numbers: a mock-up of what catering pre-orders could look like on your Instagram bio link. Two taps from story to order. Want me to send it over?' },
+      facts: ['Referral from Priya', 'Instagram is her whole funnel', 'Opens at 5am, call early', 'Wants catering pre-orders'],
+      last: 'Emailed pricing questions Monday. I answered, no reply yet.',
+      draft: 'Hi Dee, following up on the pricing note with something better than numbers: a mock-up of catering pre-orders on your Instagram bio link. Two taps from story to order. Want me to send it over?' },
     { id: 4, name: 'Sam Whitfield', role: 'Principal · Whitfield Law', stage: 0, warm: 'warm', score: 55,
       facts: ['Old college roommate', 'Firm drowning in intake forms', 'Mentioned AI twice last dinner', 'Bourbon collector'],
-      last: 'Dinner two weeks ago — “we should talk shop sometime.”',
-      draft: 'Sam — you said “talk shop sometime” and I’m collecting. Trade you one bourbon for 20 minutes on what document automation actually looks like for a firm your size. Thursday after 5?' },
+      last: 'Dinner two weeks ago. He said we should talk shop sometime.',
+      draft: 'Sam, you said we should talk shop sometime and I’m collecting. One bourbon for 20 minutes on what document automation looks like for a firm your size. Thursday after 5?' },
   ];
   let sel = 0;
 
@@ -436,7 +436,7 @@ function toast(html) {
         <div class="score"><b>${p.score}</b><span>warmth</span></div>
       </div>
       <ul class="facts">${p.facts.map((f) => `<li>${f}</li>`).join('')}</ul>
-      <p style="font-size:13.5px;color:var(--muted);font-family:var(--mono)">LAST TOUCH — ${p.last}</p>
+      <p style="font-size:13.5px;color:var(--muted);font-family:var(--mono)">LAST TOUCH · ${p.last}</p>
       <div class="draft"><p class="dh"><i></i> AI-drafted follow-up · edits welcome</p><p id="draftText"></p></div>
       <div class="actions">
         <button class="abtn primary" id="sendBtn">Send it →</button>
@@ -452,8 +452,8 @@ function toast(html) {
     $('#logBtn').addEventListener('click', () => {
       p.score = Math.min(99, p.score + 6);
       if (p.warm === 'cool') p.warm = 'warm'; else if (p.warm === 'warm') p.warm = 'hot';
-      p.last = 'Call logged just now — Orbit re-scored the relationship.';
-      toast(`Call with <b>${p.name}</b> logged — warmth up, next follow-up re-drafted.`);
+      p.last = 'Call logged just now. Orbit re-scored the relationship.';
+      toast(`Call with <b>${p.name}</b> logged. Warmth went up, and the follow-up was re-drafted.`);
       renderPipe(); renderDetail();
     });
     $('#advBtn').addEventListener('click', () => {

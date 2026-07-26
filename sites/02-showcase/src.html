@@ -1,9 +1,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Yoon Lab — AI in Action</title>
-<meta name="description" content="Three live demos — an AI booking concierge, a self-narrating dashboard, and a personal CRM that drafts your follow-ups. Operate them yourself.">
-<meta property="og:title" content="The Yoon Lab — AI in Action">
-<meta property="og:description" content="Don't take my word for it — operate it. Live chatbot, dashboard and CRM demos by Daniel Yoon.">
+<title>The Yoon Lab · AI in Action</title>
+<meta name="description" content="Three working demos: a booking assistant, a live dashboard, and a personal CRM that writes your follow-ups. Try them yourself.">
+<meta property="og:title" content="The Yoon Lab · AI in Action">
+<meta property="og:description" content="Don't take my word for it, operate it. Live chatbot, dashboard and CRM demos by Daniel Yoon.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F3F1EC'/%3E%3Crect x='14' y='14' width='36' height='36' rx='4' fill='none' stroke='%231A1713' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%238E2F26'/%3E%3C/svg%3E">
 <style>
@@ -16,7 +16,7 @@
   --sub:#544F48;
   --muted:#8A857A;
   --hairline:#DCD8CD;
-  --blue:#8E2F26;       /* oxblood — primary accent (legacy var name) */
+  --blue:#8E2F26;       /* oxblood, primary accent (legacy var name) */
   --blue-deep:#6E211B;
   --wash:#F6E8E3;
   --ochre:#B98122;
@@ -342,7 +342,7 @@ body.guide-mode #guide{display:block}
 
 <header class="top">
   <div class="top-in">
-    <a class="brand" href="#/" data-route="home" aria-label="The Yoon Lab — home">
+    <a class="brand" href="#/" data-route="home" aria-label="The Yoon Lab, home">
       <span class="box" aria-hidden="true"><i></i></span>
       <span>The Yoon Lab<small>AI in action</small></span>
     </a>
@@ -362,25 +362,25 @@ body.guide-mode #guide{display:block}
     <section class="hero">
       <p class="kicker rv"><span class="dot" aria-hidden="true"></span> 3 live systems on this page</p>
       <h1 class="rv rv-d1">Don’t take my word for it. <span class="accent circled">Operate it.<svg viewBox="0 0 300 90" aria-hidden="true"><path d="M12,55 C30,14 268,2 288,38 C300,62 240,86 120,84 C60,83 14,74 12,55"/></svg></span></h1>
-      <p class="sub rv rv-d2">Every consultant promises AI will transform your business. This page skips the promise:
-      a booking concierge, a self-narrating dashboard, and a personal CRM that drafts your follow-ups —
-      <b>all running live, right here, built by Daniel Yoon.</b></p>
+      <p class="sub rv rv-d2">Anyone can tell you AI will change your business. I would rather show you. There are
+      three working systems on this page: a booking assistant, a live dashboard, and a personal CRM.
+      <b>Click around, break things, see what you think.</b> Built by Daniel Yoon.</p>
       <div class="jump rv rv-d3">
         <a href="#s1" data-scroll><span class="tag" style="background:var(--blue)"></span> Station 01 <b>Concierge</b></a>
         <a href="#s2" data-scroll><span class="tag" style="background:var(--ochre)"></span> Station 02 <b>Pulse</b></a>
         <a href="#s3" data-scroll><span class="tag" style="background:var(--forest)"></span> Station 03 <b>Orbit</b></a>
       </div>
       <div class="ticker rv rv-d3" aria-hidden="true" id="ticker">
-        <span>All demos run in your browser</span><span>No data leaves this page</span><span>Hand-built · zero frameworks</span><span id="tickClock">—</span>
+        <span>All demos run in your browser</span><span>No data leaves this page</span><span>Hand-built · zero frameworks</span><span id="tickClock">···</span>
       </div>
     </section>
 
     <!-- STATION 1 : CHATBOT -->
     <section class="station" id="s1">
-      <div class="st-head rv"><span class="no">STATION 01</span><h2>Concierge — <em>the hire that never sleeps</em></h2></div>
-      <p class="st-sub rv rv-d1">A booking assistant for a fictional dental studio. It answers policy questions,
-      checks a live calendar, and books the appointment — <b>try the chips, or type freely</b>
-      (ask about insurance, prices, hours, or say “ouch”).</p>
+      <div class="st-head rv"><span class="no">STATION 01</span><h2>Concierge, <em>the hire that never sleeps</em></h2></div>
+      <p class="st-sub rv rv-d1">This one works for a made-up dental office. Ask about insurance, prices, or hours,
+      or just say ouch and see what happens. <b>The chips are shortcuts, but you can type
+      anything you want.</b></p>
       <div class="chat-grid">
         <div class="panel rv" aria-label="Chatbot demo">
           <div class="panel-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span> juniper-dental · concierge
@@ -396,20 +396,20 @@ body.guide-mode #guide{display:block}
         </div>
         <aside class="chat-notes rv rv-d2">
           <div class="note"><h4><span class="sw" style="background:var(--blue)"></span>Trained on the business</h4>
-            <p>In production this runs on your real policies, price list, and calendar — same behavior, your facts.</p></div>
+            <p>The real version runs on your actual price list, policies, and calendar. Same behavior, your facts.</p></div>
           <div class="note"><h4><span class="sw" style="background:var(--ochre)"></span>Books, not just chats</h4>
-            <p>The demo walks a real booking flow — day, time, confirmation — the part that turns questions into revenue.</p></div>
+            <p>It does more than chat. It walks the whole booking: day, time, name, confirmed. That part pays for itself.</p></div>
           <div class="note"><h4><span class="sw" style="background:var(--forest)"></span>Knows when to hand off</h4>
-            <p>Say <code>ouch</code> or ask for a human — urgent cases skip the script and escalate immediately.</p></div>
+            <p>Say <code>ouch</code> or ask for a human. Urgent things skip the script and go straight to a person.</p></div>
         </aside>
       </div>
     </section>
 
     <!-- STATION 2 : DASHBOARD -->
     <section class="station" id="s2">
-      <div class="st-head rv"><span class="no">STATION 02</span><h2>Pulse — <em>a dashboard that explains itself</em></h2></div>
-      <p class="st-sub rv rv-d1">Live operations for the same fictional studio. The numbers tick, the charts move,
-      and the AI narration line tells you <b>what changed and what to do about it</b> — hover the charts.</p>
+      <div class="st-head rv"><span class="no">STATION 02</span><h2>Pulse, <em>a dashboard that explains itself</em></h2></div>
+      <p class="st-sub rv rv-d1">Same fictional office, live numbers. Watch the tiles tick and hover over the charts.
+      The line up top is the part I like best: <b>it reads the data and tells you what to do about it.</b></p>
       <div class="panel rv" aria-label="Dashboard demo">
         <div class="panel-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span> juniper-dental · pulse
           <span class="right"><span class="live" aria-hidden="true"></span> streaming</span></div>
@@ -418,13 +418,13 @@ body.guide-mode #guide{display:block}
           <div class="tiles" id="tiles"></div>
           <div class="charts">
             <div class="chartbox">
-              <h3>Bookings per hour — today</h3>
+              <h3>Bookings per hour today</h3>
               <p class="sub">VS. TARGET (DASHED)</p>
               <canvas id="lineChart"></canvas>
               <div class="tip" id="lineTip"></div>
             </div>
             <div class="chartbox">
-              <h3>New patients by channel — this week</h3>
+              <h3>New patients by channel, this week</h3>
               <p class="sub">HOVER FOR VALUES</p>
               <canvas id="barChart"></canvas>
               <div class="tip" id="barTip"></div>
@@ -436,9 +436,9 @@ body.guide-mode #guide{display:block}
 
     <!-- STATION 3 : CRM -->
     <section class="station" id="s3">
-      <div class="st-head rv"><span class="no">STATION 03</span><h2>Orbit — <em>a memory for every relationship</em></h2></div>
-      <p class="st-sub rv rv-d1">A personal CRM seeded with five relationships. Click a person — Orbit scores the
-      relationship, recalls the human details, and <b>drafts the follow-up for you</b>. Advance deals, log calls, watch it re-think.</p>
+      <div class="st-head rv"><span class="no">STATION 03</span><h2>Orbit, <em>a memory for every relationship</em></h2></div>
+      <p class="st-sub rv rv-d1">Five relationships, already loaded. Click a person and Orbit pulls up the human
+      details, scores how warm things are, and <b>writes the follow-up for you</b>. Log a call or advance a deal and watch it re-think.</p>
       <div class="panel rv" aria-label="CRM demo">
         <div class="panel-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span> orbit · personal crm
           <span class="right"><span class="live" aria-hidden="true"></span> 5 relationships</span></div>
@@ -453,8 +453,8 @@ body.guide-mode #guide{display:block}
     <section class="method">
       <h2 class="rv">Three demos, one method: <em>find the leak, build the fix, wire it in.</em></h2>
       <div class="mrow">
-        <div class="mcell rv"><p class="mi">Weeks 1–2</p><h4>Find the leak</h4><p>I sit inside your operation and map where hours and leads actually disappear — before proposing anything.</p></div>
-        <div class="mcell rv rv-d1"><p class="mi">Weeks 3–6</p><h4>Build the fix</h4><p>Working software early: a concierge, a dashboard, a CRM — shaped to your business, demoed weekly.</p></div>
+        <div class="mcell rv"><p class="mi">Weeks 1-2</p><h4>Find the leak</h4><p>I sit inside your operation first and find where the hours and leads actually go. No proposals until then.</p></div>
+        <div class="mcell rv rv-d1"><p class="mi">Weeks 3-6</p><h4>Build the fix</h4><p>Then I build. You see working software every week, shaped to how your business runs.</p></div>
         <div class="mcell rv rv-d2"><p class="mi">Ongoing</p><h4>Wire it in &amp; tune</h4><p>Embedded in the tools you already use, measured against baseline, sharpened until the numbers move.</p></div>
       </div>
     </section>
@@ -470,7 +470,7 @@ body.guide-mode #guide{display:block}
       <a class="abtn" href="#/guide" data-route="guide">How this page was built</a>
     </div>
     <div class="small">
-      <span>© 2026 Daniel Yoon — The Yoon Lab</span>
+      <span>© 2026 Daniel Yoon · The Yoon Lab</span>
       <a href="#/guide" data-route="guide">Design &amp; build guide</a>
       <span>Demos are fictional data · nothing leaves your browser</span>
     </div>
@@ -484,25 +484,24 @@ body.guide-mode #guide{display:block}
   <div class="gwrap">
     <p class="kicker">Guide · How this page was made</p>
     <h1>The lab notebook.</h1>
-    <p class="lede">Site two of a pair. The studio site argues taste; this one argues <b>proof</b> —
-    so every design decision here optimizes for touching the goods.</p>
+    <p class="lede">This is the second site of a pair. The studio site makes the case with taste.
+    This one makes it with <b>proof</b>, so everything here is built to be touched.</p>
 
     <div class="gsec">
       <h2>Concept</h2>
-      <p>A <b>lab bench</b>: three numbered stations, each a working system you operate — a scripted
-      booking concierge, a live-streaming dashboard with AI narration, and a personal CRM that drafts follow-ups.
-      All logic runs client-side; the fictional “Juniper Dental Studio” supplies the shared narrative.</p>
-      <p>It is deliberately the studio site’s opposite: light where that is dark, Swiss-tactile where that is
-      cinematic, hard 2px borders and offset shadows where that dissolves into particles.</p>
+      <p>The idea is a <b>lab bench</b>: three numbered stations, each one a working system.
+      Everything runs in your browser, and a made-up practice called Juniper Dental Studio ties
+      the three demos together.</p>
+      <p>It is built to be the studio site’s opposite. Light where that one is dark, hard edges
+      where that one dissolves into particles.</p>
     </div>
 
     <div class="gsec">
       <h2>Design system</h2>
-      <p>Two-color letterpress, extended: warm paper, press-black ink, and an <b>oxblood</b> accent spent on
-      interaction — with ochre and forest as station marks, the palette of a century-old print shop. Hard
-      shadows <b>move when you press</b>; every button physically depresses. Chart colors follow a validated
-      data-viz palette (categorical slots capped at three; single-hue bars for magnitude; status green
-      reserved for “live”).</p>
+      <p>The palette is borrowed from old print shops: warm paper, press-black ink, and one
+      <b>oxblood</b> red doing the accent work, with ochre and forest marking the stations. Hard shadows
+      <b>move when you press</b>; every button physically depresses. Chart colors come from a validated
+      data-viz palette, capped at three series, with status green reserved for the live dots.</p>
       <div class="gsw">
         <div><div class="c" style="background:#F3F1EC"></div><div class="t"><b>Paper</b>#F3F1EC</div></div>
         <div><div class="c" style="background:#FBFAF7"></div><div class="t"><b>Card</b>#FBFAF7</div></div>
@@ -517,28 +516,28 @@ body.guide-mode #guide{display:block}
 
     <div class="gsec">
       <h2>Typography</h2>
-      <p>Print pedigree over fashion: <b>Besley</b> — a Clarendon revival named for the 1845 Besley foundry —
-      carries the headlines like a scientific catalog. <b>Libre Franklin</b> (Franklin Gothic, 1902) does the
-      body and UI work. <b>IBM Plex Mono</b> handles labels, data, and anything that smells like a machine.
-      All three subset to Latin, embedded base64 — the page makes zero external requests.</p>
+      <p>The headlines are set in <b>Besley</b>, a Clarendon revival named for a type foundry
+      founded in 1845. Body text and buttons are <b>Libre Franklin</b>, a Franklin Gothic descendant
+      from 1902. <b>IBM Plex Mono</b> covers the labels and the data. All three are embedded in the
+      file itself, so the page makes zero external requests.</p>
     </div>
 
     <div class="gsec">
       <h2>The demos, honestly</h2>
       <ul class="glist">
-        <li><b>Concierge</b> — a scripted intent-matcher (keywords + a real multi-step booking flow), with typing
-        physics and natural delays. Production versions swap the script for a model grounded in your documents.</li>
-        <li><b>Pulse</b> — hand-drawn canvas charts on simulated live data: crosshair + tooltip on the line,
-        per-bar hovers, a target reference line, and a narration engine that reacts to what the data does.</li>
-        <li><b>Orbit</b> — five seeded relationships with warmth scoring, stage advancement, and a
-        typewriter-drafted follow-up per contact, re-thought on every interaction you take.</li>
+        <li><b>Concierge</b> is a scripted intent matcher with a real multi-step booking flow and natural
+        typing delays. The production version swaps the script for a model grounded in your documents.</li>
+        <li><b>Pulse</b> draws its charts by hand on canvas over simulated live data, with tooltips,
+        a target line, and a narration engine that reacts to what the numbers do.</li>
+        <li><b>Orbit</b> holds five seeded relationships with warmth scores, pipeline stages, and a
+        drafted follow-up for each person that updates whenever you act.</li>
       </ul>
     </div>
 
     <div class="gsec">
       <h2>Engineering notes</h2>
       <ul class="glist">
-        <li>One self-contained HTML file — no frameworks, no CDNs, no build dependencies at runtime.</li>
+        <li>One self-contained HTML file. No frameworks, no CDNs, nothing to install.</li>
         <li>Charts are raw canvas at devicePixelRatio, redrawn on a 2.5s data tick; tooltips are DOM, not canvas.</li>
         <li>Hash-canonical router (<b>#/guide</b>) so guide links survive refresh on static hosting.</li>
         <li>Every animation honors <b>prefers-reduced-motion</b>; the data still ticks, the theatrics stop.</li>
