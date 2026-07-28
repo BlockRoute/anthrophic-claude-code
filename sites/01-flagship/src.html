@@ -1,0 +1,573 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daniel Yoon · AI Implementation Studio</title>
+<meta name="description" content="Daniel Yoon builds AI into real businesses: websites, dashboards, software, chatbots, and CRM systems that think.">
+<meta property="og:title" content="Daniel Yoon · AI Implementation Studio">
+<meta property="og:description" content="Intelligence, installed. Websites, dashboards, software, AI chatbots and personal CRMs, built for real businesses.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111417'/%3E%3Cpath d='M32 10l5.5 16.5L54 32l-16.5 5.5L32 54l-5.5-16.5L10 32l16.5-5.5z' fill='%23C9A45C'/%3E%3C/svg%3E">
+<style>
+/*__FONTS__*/
+
+:root{
+  --ink:#111417;
+  --deep:#191D21;
+  --raise:#20252A;
+  --line:rgba(196,193,178,.15);
+  --line-strong:rgba(196,193,178,.30);
+  --mist:#A4A79B;
+  --dim:#75786C;
+  --paper:#F1EEE3;
+  --copper:#C9A45C;
+  --copper-soft:rgba(201,164,92,.14);
+  --peri:#8195A9;
+  --serif:'Sorts Mill Goudy', Georgia, serif;
+  --sans:'Alegreya Sans', system-ui, sans-serif;
+  --mono:'Courier Prime', ui-monospace, monospace;
+  --gutter:clamp(20px, 5vw, 96px);
+  --ease-out:cubic-bezier(.19,1,.22,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--copper);color:var(--ink)}
+
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--copper);outline-offset:3px;border-radius:2px}
+
+/* ---------- canvas stage ---------- */
+#stage{
+  position:fixed;inset:0;z-index:0;display:block;width:100%;height:100%;
+}
+.vignette{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 10%, transparent 40%, rgba(10,11,10,.55) 100%);
+}
+.grain{
+  position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 9s steps(6) infinite;
+}
+@keyframes grain{
+  0%,100%{transform:translate(0,0)} 20%{transform:translate(-6%,4%)} 40%{transform:translate(4%,-7%)}
+  60%{transform:translate(-3%,-5%)} 80%{transform:translate(6%,3%)}
+}
+@media (prefers-reduced-motion: reduce){ .grain{animation:none} }
+.progress{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:60;pointer-events:none;
+}
+.progress i{
+  display:block;height:100%;background:linear-gradient(90deg,var(--copper),var(--peri));
+  transform-origin:0 50%;transform:scaleX(0);
+}
+
+/* ---------- nav ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px var(--gutter);
+  transition:background .4s, backdrop-filter .4s;
+}
+.nav.scrolled{background:rgba(15,17,19,.74);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.wordmark{display:flex;flex-direction:column;line-height:1.15}
+.wordmark b{font-family:var(--serif);font-weight:400;font-size:21px;letter-spacing:.01em}
+.wordmark span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-top:2px}
+.nav-links{display:flex;gap:34px;align-items:center;font-size:14px;letter-spacing:.02em}
+.nav-links a{color:var(--mist);position:relative;padding:4px 0;transition:color .25s}
+.nav-links a:hover{color:var(--paper)}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:0;height:1px;width:0;background:var(--copper);transition:width .35s var(--ease-out)}
+.nav-links a:hover::after{width:100%}
+.nav-links .guide-pill{
+  color:var(--ink);background:var(--paper);padding:8px 18px;border-radius:100px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  transition:background .25s,color .25s;
+}
+.nav-links .guide-pill:hover{background:var(--copper);color:var(--ink)}
+.nav-links .guide-pill::after{display:none}
+@media (max-width:760px){ .nav-links a:not(.guide-pill){display:none} }
+
+/* ---------- shared section shell ---------- */
+main{position:relative;z-index:2}
+.shell{max-width:1280px;margin:0 auto;padding:0 var(--gutter)}
+section{position:relative}
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--copper);display:flex;align-items:center;gap:14px;
+}
+.eyebrow::before{content:'';width:34px;height:1px;background:var(--copper);display:inline-block;opacity:.7}
+
+/* reveal system */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease-out),transform .9s var(--ease-out)}
+.rv.in{opacity:1;transform:none}
+.rv-d1{transition-delay:.08s}.rv-d2{transition-delay:.16s}.rv-d3{transition-delay:.26s}.rv-d4{transition-delay:.36s}
+@media (prefers-reduced-motion: reduce){
+  .rv{opacity:1;transform:none;transition:none}
+}
+
+/* line mask reveal for display type */
+.lm{display:block;overflow:hidden;padding-block:.09em;margin-block:-.09em}
+.lm > span{display:block;transform:translateY(115%);transition:transform 1.1s var(--ease-out)}
+.in .lm > span, .lm.in > span{transform:none}
+.lm:nth-child(2) > span{transition-delay:.1s}
+.lm:nth-child(3) > span{transition-delay:.2s}
+@media (prefers-reduced-motion: reduce){ .lm > span{transform:none;transition:none} }
+
+/* ---------- hero ---------- */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding-top:80px}
+.hero .shell{width:100%}
+.hero h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(52px, 10.5vw, 150px);
+  line-height:1.04;letter-spacing:-.005em;text-wrap:balance;
+  margin:22px 0 28px;
+}
+.hero h1 em{font-style:italic;color:var(--copper)}
+.hero .sub{
+  max-width:34em;color:var(--mist);font-size:clamp(16px,1.5vw,19px);line-height:1.65;
+}
+.hero-meta{
+  display:flex;gap:38px;margin-top:54px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.hero-meta b{display:block;color:var(--paper);font-weight:400;font-size:12.5px;margin-top:4px}
+.scroll-hint{
+  position:absolute;bottom:34px;left:var(--gutter);
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);
+}
+.scroll-hint .tick{width:1px;height:44px;background:var(--line-strong);position:relative;overflow:hidden}
+.scroll-hint .tick::after{content:'';position:absolute;left:0;top:-50%;width:1px;height:50%;background:var(--copper);animation:tickfall 2.2s var(--ease-out) infinite}
+@keyframes tickfall{0%{top:-50%}70%,100%{top:110%}}
+@media (prefers-reduced-motion: reduce){ .scroll-hint .tick::after{animation:none} }
+
+/* ---------- marquee ---------- */
+.marquee{
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:20px 0;overflow:hidden;white-space:nowrap;
+  background:rgba(15,17,19,.4);backdrop-filter:blur(4px);
+}
+.marquee .track{display:inline-flex;gap:0;animation:slide 36s linear infinite;will-change:transform}
+.marquee span{
+  font-family:var(--serif);font-size:30px;font-style:italic;color:var(--mist);
+  padding:0 28px;display:inline-flex;align-items:center;gap:56px;
+}
+.marquee span:nth-child(even){
+  font-style:normal;color:transparent;
+  -webkit-text-stroke:1px rgba(154,164,200,.55);
+}
+.marquee span::after{content:'✦';font-size:14px;color:var(--copper);font-style:normal;-webkit-text-stroke:0}
+@keyframes slide{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion: reduce){ .marquee .track{animation:none} }
+
+/* ---------- thesis ---------- */
+.thesis{padding:clamp(110px,16vh,200px) 0}
+.thesis p{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(28px,4.3vw,54px);line-height:1.26;letter-spacing:0;
+  max-width:20em;text-wrap:balance;
+}
+.thesis p em{font-style:italic;color:var(--copper)}
+.thesis .aside{
+  margin-top:34px;max-width:36em;color:var(--mist);font-family:var(--sans);font-size:17px;
+}
+
+/* ---------- services ---------- */
+.services-head{padding:40px 0 10px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+.services-head h2{font-family:var(--serif);font-weight:400;font-size:clamp(36px,5vw,64px);letter-spacing:-.01em}
+.services-head .count{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.18em}
+
+.panel{
+  min-height:92svh;display:grid;align-items:center;
+  grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(30px,6vw,110px);
+  padding:60px 0;border-top:1px solid var(--line);
+}
+.panel:nth-child(even){grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+.panel:nth-child(even) .panel-copy{order:2}
+.panel-ghost{min-height:200px}  /* empty column; the particle canvas performs here */
+.panel-copy .code{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:var(--dim);
+  display:flex;align-items:baseline;gap:16px;margin-bottom:22px;
+}
+.panel-copy .code b{color:var(--copper);font-weight:400}
+.panel-copy h3{
+  font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.6vw,76px);
+  line-height:1.08;letter-spacing:-.005em;margin-bottom:24px;text-wrap:balance;
+}
+.panel-copy h3 em{font-style:italic;color:var(--copper)}
+.panel-copy p{color:var(--mist);max-width:32em;margin-bottom:30px}
+.spec{display:flex;flex-wrap:wrap;gap:10px}
+.spec li{
+  list-style:none;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mist);border:1px solid var(--line-strong);border-radius:100px;padding:7px 14px;
+  transition:border-color .3s,color .3s;
+}
+.panel:hover .spec li{border-color:rgba(217,143,82,.45)}
+@media (max-width:900px){
+  .panel,.panel:nth-child(even){grid-template-columns:1fr;min-height:auto;padding:80px 0}
+  .panel:nth-child(even) .panel-copy{order:0}
+  .panel-ghost{display:none}
+}
+
+/* ---------- process ---------- */
+.process{padding:clamp(110px,16vh,190px) 0;border-top:1px solid var(--line)}
+.process h2{font-family:var(--serif);font-weight:400;font-size:clamp(36px,5vw,64px);margin:22px 0 60px;letter-spacing:-.01em}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line)}
+.step{background:var(--ink);padding:30px 22px 40px;position:relative;transition:background .4s;overflow:hidden}
+.step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--copper);
+  transform:scaleX(0);transform-origin:0 50%;transition:transform .5s var(--ease-out);
+}
+.step:hover{background:var(--deep)}
+.step:hover::before{transform:scaleX(1)}
+.step .n{font-family:var(--mono);font-size:11px;color:var(--copper);letter-spacing:.18em}
+.step h4{font-family:var(--serif);font-weight:400;font-size:24px;margin:16px 0 10px}
+.step p{color:var(--mist);font-size:14.5px;line-height:1.55}
+@media (max-width:980px){ .steps{grid-template-columns:1fr 1fr} }
+@media (max-width:560px){ .steps{grid-template-columns:1fr} }
+
+/* ---------- results ---------- */
+.results{padding:clamp(110px,16vh,190px) 0;border-top:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(24px,4vw,60px);margin:70px 0 0}
+.stat .num{
+  font-family:var(--serif);font-size:clamp(44px,5.5vw,76px);line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.stat .num i{font-style:normal;color:var(--copper)}
+.stat .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:14px;line-height:1.6}
+@media (max-width:760px){ .stats{grid-template-columns:1fr 1fr} }
+
+/* ---------- contact ---------- */
+.contact{padding:clamp(130px,20vh,240px) 0;border-top:1px solid var(--line);text-align:left}
+.contact h2{
+  font-family:var(--serif);font-weight:400;font-size:clamp(48px,9vw,128px);
+  line-height:1.06;letter-spacing:-.01em;margin:26px 0 40px;text-wrap:balance;
+}
+.contact h2 em{font-style:italic;color:var(--copper)}
+.contact .mail{
+  display:inline-flex;align-items:center;gap:16px;
+  font-family:var(--mono);font-size:clamp(14px,2vw,18px);letter-spacing:.06em;color:var(--paper);
+  border-bottom:1px solid var(--line-strong);padding-bottom:8px;transition:border-color .3s,color .3s;
+}
+.contact .mail:hover{color:var(--copper);border-color:var(--copper)}
+.contact .mail .arrow{transition:transform .35s var(--ease-out)}
+.contact .mail:hover .arrow{transform:translateX(6px)}
+.next-site{
+  margin-top:80px;padding:30px 34px;border:1px solid var(--line);border-radius:16px;
+  display:flex;justify-content:space-between;align-items:center;gap:20px;max-width:640px;
+  background:rgba(25,29,33,.5);backdrop-filter:blur(8px);
+  transition:border-color .35s, transform .35s var(--ease-out);
+}
+.next-site:hover{border-color:rgba(217,143,82,.5);transform:translateY(-3px)}
+.next-site .t{font-family:var(--serif);font-size:24px}
+.next-site .d{color:var(--mist);font-size:14px;margin-top:4px}
+.next-site .go{font-family:var(--mono);font-size:12px;color:var(--copper);letter-spacing:.12em;white-space:nowrap}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:34px var(--gutter);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:2;background:rgba(15,17,19,.6)}
+footer, footer a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+footer a:hover{color:var(--copper)}
+
+/* ---------- guide view ---------- */
+#guide{display:none;position:relative;z-index:2}
+body.guide-mode main, body.guide-mode footer.site-footer{display:none}
+body.guide-mode #guide{display:block}
+.guide-wrap{max-width:880px;margin:0 auto;padding:150px var(--gutter) 120px}
+.guide-wrap h1{font-family:var(--serif);font-weight:400;font-size:clamp(42px,6vw,72px);line-height:1.05;letter-spacing:-.015em;margin:20px 0 18px;text-wrap:balance}
+.guide-wrap .lede{color:var(--mist);font-size:19px;max-width:34em;margin-bottom:70px}
+.guide-sec{border-top:1px solid var(--line);padding:44px 0}
+.guide-sec h2{font-family:var(--serif);font-weight:400;font-size:30px;margin-bottom:18px}
+.guide-sec p{color:var(--mist);max-width:38em;margin-bottom:14px}
+.guide-sec p b{color:var(--paper);font-weight:500}
+.swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
+@media (max-width:560px){ .swatches{grid-template-columns:1fr 1fr} }
+.swatch{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.swatch .chip{height:64px;box-shadow:inset 0 0 0 1px rgba(151,161,196,.18)}
+.swatch .info{padding:10px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--mist);text-transform:uppercase}
+.swatch .info b{display:block;color:var(--paper);font-weight:400;font-size:11px;margin-bottom:2px}
+.type-spec{border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-top:22px;display:grid;gap:18px}
+.type-spec .row{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.type-spec .demo-serif{font-family:var(--serif);font-size:34px}
+.type-spec .demo-serif em{color:var(--copper)}
+.type-spec .demo-sans{font-size:17px}
+.type-spec .demo-mono{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.type-spec .tag{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.guide-list{margin:14px 0 0;padding-left:0}
+.guide-list li{list-style:none;display:flex;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line);color:var(--mist);font-size:15px}
+.guide-list li::before{content:'→';color:var(--copper);flex:0 0 auto}
+.back-home{
+  display:inline-flex;align-items:center;gap:12px;margin-top:50px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);
+  border:1px solid rgba(217,143,82,.4);border-radius:100px;padding:12px 24px;transition:background .3s,color .3s;
+}
+.back-home:hover{background:var(--copper);color:var(--ink)}
+</style>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+
+<header class="nav" id="nav">
+  <a class="wordmark" href="/" data-route="home" aria-label="Daniel Yoon, home">
+    <b>Daniel Yoon</b>
+    <span>AI Implementation</span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="#services" data-scroll>Services</a>
+    <a href="#process" data-scroll>Process</a>
+    <a href="#results" data-scroll>Results</a>
+    <a href="#contact" data-scroll>Contact</a>
+    <a href="#/guide" class="guide-pill" data-route="guide">Guide</a>
+  </nav>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="hero" data-shape="0" data-off="0.34">
+    <div class="shell">
+      <p class="eyebrow rv">AI Implementation Studio</p>
+      <h1 class="rv" id="heroTitle">
+        <span class="lm"><span>Intelligence,</span></span>
+        <span class="lm"><span><em>installed.</em></span></span>
+      </h1>
+      <p class="sub rv rv-d2">I help businesses put AI to work where it actually pays off: the website,
+        the reporting, the follow-ups, the questions that come in at 2am. Real systems, built
+        around the way you already run things.</p>
+      <div class="hero-meta rv rv-d3">
+        <div>Based in<b>Virginia, USA</b></div>
+        <div>Working<b>Worldwide · Remote</b></div>
+        <div>Currently<b>Taking new clients</b></div>
+      </div>
+    </div>
+    <div class="scroll-hint" aria-hidden="true"><div class="tick"></div><span>Scroll</span></div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="track" id="marqueeTrack">
+      <span>Websites</span><span>Dashboards</span><span>Software</span><span>AI Chatbots</span><span>Personal CRMs</span><span>Automation</span>
+    </div>
+  </div>
+
+  <!-- THESIS -->
+  <section class="thesis" data-shape="0" data-off="0.5" data-dim="0.7">
+    <div class="shell">
+      <p class="rv">Most businesses don’t need <em>more</em> technology.
+      They need the technology they have to start <em>thinking</em>.</p>
+      <p class="aside rv rv-d2">I don’t sell strategy decks. I build the thing, wire it into your
+      day to day, and stick around tuning it until the numbers move.</p>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="shell">
+      <div class="services-head rv">
+        <div>
+          <p class="eyebrow">The practice</p>
+          <h2>Five ways in.</h2>
+        </div>
+        <p class="count">CATALOG · 05 LINES</p>
+      </div>
+
+      <article class="panel" data-shape="1">
+        <div class="panel-copy rv">
+          <p class="code"><b>01</b> WEBSITES</p>
+          <h3>Sites that <em>sell</em> while you sleep.</h3>
+          <p>Your website should be your best salesperson. I build sites that adjust to whoever
+             is reading them, answer questions on the spot, and show you exactly which pages
+             bring in customers.</p>
+          <ul class="spec">
+            <li>AI Personalization</li><li>Semantic Search</li><li>Motion Design</li><li>SEO / AEO</li>
+          </ul>
+        </div>
+        <div class="panel-ghost" aria-hidden="true"></div>
+      </article>
+
+      <article class="panel" data-shape="2">
+        <div class="panel-copy rv">
+          <p class="code"><b>02</b> DASHBOARDS</p>
+          <h3>Every number, <em>one glance.</em></h3>
+          <p>If your numbers live in five different tools, you never really see them. I pull
+             everything onto one live screen that flags what needs your attention and says it
+             in plain English.</p>
+          <ul class="spec">
+            <li>Live Data</li><li>AI Narration</li><li>Anomaly Alerts</li><li>KPI Design</li>
+          </ul>
+        </div>
+        <div class="panel-ghost" aria-hidden="true"></div>
+      </article>
+
+      <article class="panel" data-shape="3">
+        <div class="panel-copy rv">
+          <p class="code"><b>03</b> SOFTWARE</p>
+          <h3>Tools shaped to <em>your</em> business.</h3>
+          <p>When off the shelf doesn’t fit, I build the tool that does. Quoting, scheduling,
+             paperwork. AI handles the boring ninety percent so your team can do the parts
+             that need a person.</p>
+          <ul class="spec">
+            <li>Internal Tools</li><li>Workflow Automation</li><li>Document AI</li><li>Integrations</li>
+          </ul>
+        </div>
+        <div class="panel-ghost" aria-hidden="true"></div>
+      </article>
+
+      <article class="panel" data-shape="4">
+        <div class="panel-copy rv">
+          <p class="code"><b>04</b> AI CHATBOTS</p>
+          <h3>Your best hire <em>never sleeps.</em></h3>
+          <p>I train assistants on your actual business: your prices, your policies, your tone.
+             They book appointments, answer the 2am questions, and know when to hand the
+             conversation to a real person.</p>
+          <ul class="spec">
+            <li>Lead Qualification</li><li>Booking</li><li>Support Deflection</li><li>Brand Voice</li>
+          </ul>
+        </div>
+        <div class="panel-ghost" aria-hidden="true"></div>
+      </article>
+
+      <article class="panel" data-shape="5">
+        <div class="panel-copy rv">
+          <p class="code"><b>05</b> PERSONAL CRM</p>
+          <h3>A memory for <em>every</em> relationship.</h3>
+          <p>A personal CRM that actually remembers. The kids’ names, the deal that stalled last
+             spring, who you owe a call. It drafts the follow-up for you, so staying in touch
+             stops being a chore.</p>
+          <ul class="spec">
+            <li>Auto Follow-ups</li><li>Relationship Scoring</li><li>Pipeline Views</li><li>Enrichment</li>
+          </ul>
+        </div>
+        <div class="panel-ghost" aria-hidden="true"></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="process" id="process" data-shape="6" data-off="0.42" data-dim="0.4">
+    <div class="shell">
+      <p class="eyebrow rv">How it works</p>
+      <h2 class="rv rv-d1">Installed in five moves.</h2>
+      <div class="steps rv rv-d2">
+        <div class="step"><p class="n">STEP 1</p><h4>Discover</h4><p>A week inside your operation. I map where hours and margin actually leak.</p></div>
+        <div class="step"><p class="n">STEP 2</p><h4>Design</h4><p>You get a plan in plain English: what gets built, what it replaces, what it should earn back.</p></div>
+        <div class="step"><p class="n">STEP 3</p><h4>Build</h4><p>Working software early and often. You see it running in days, not quarters.</p></div>
+        <div class="step"><p class="n">STEP 4</p><h4>Embed</h4><p>Wired into the tools your team already lives in. No new tabs to forget.</p></div>
+        <div class="step"><p class="n">STEP 5</p><h4>Tune</h4><p>Measured against the baseline and sharpened monthly until the numbers move.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results" id="results" data-shape="6" data-off="0.42" data-dim="0.4">
+    <div class="shell">
+      <p class="eyebrow rv">Proof</p>
+      <h2 class="rv rv-d1" style="font-family:var(--serif);font-weight:400;font-size:clamp(36px,5vw,64px);margin-top:22px;letter-spacing:-.01em">Quietly earning, every day.</h2>
+      <div class="stats rv rv-d2">
+        <div class="stat"><p class="num"><span data-count="38">0</span><i>%</i></p><p class="lbl">Average admin hours returned per week</p></div>
+        <div class="stat"><p class="num"><span data-count="24">0</span><i>/7</i></p><p class="lbl">Coverage from assistants that never clock out</p></div>
+        <div class="stat"><p class="num"><i>&lt;</i><span data-count="60">0</span><i>s</i></p><p class="lbl">Typical lead response time after install</p></div>
+        <div class="stat"><p class="num"><span data-count="100">0</span><i>%</i></p><p class="lbl">Systems delivered into production, not decks</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact" data-shape="6" data-off="0.32" data-dim="0.75">
+    <div class="shell">
+      <p class="eyebrow rv">Start</p>
+      <h2 class="rv rv-d1">Put intelligence<br><em>to work.</em></h2>
+      <a class="mail rv rv-d2" href="mailto:daniel@oppalabs.com">daniel@oppalabs.com <span class="arrow">→</span></a>
+      <a class="next-site rv rv-d3" href="__SITE2_URL__" id="nextSiteLink">
+        <span><span class="t">See it working</span><br><span class="d">Live demos you can try: a chatbot, a dashboard, and a CRM.</span></span>
+        <span class="go">VISIT LAB →</span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Daniel Yoon</span>
+  <a href="#/guide" data-route="guide">Design &amp; build guide</a>
+  <span>Hand-built · Zero templates</span>
+</footer>
+
+<!-- GUIDE VIEW -->
+<section id="guide" aria-label="Design and build guide">
+  <div class="guide-wrap">
+    <p class="eyebrow">Guide · How this site was made</p>
+    <h1>An engine room tour.</h1>
+    <p class="lede">Here is how this site was made: the design system, the motion, and the tech.
+    A portfolio about building things ought to show its own blueprints.</p>
+
+    <div class="guide-sec">
+      <h2>Concept</h2>
+      <p>The spine of the site is one <b>hand-written WebGL particle engine</b>. No Three.js, no libraries.
+      It renders about 14,000 points that reshape themselves seven times as you scroll: a knot, a browser
+      window, a bar chart, a lattice, chat bubbles, a network, and a galaxy.</p>
+      <p>That is the pitch in a single image. The same intelligence, <b>reshaped for whatever job</b> the business needs done.</p>
+    </div>
+
+    <div class="guide-sec">
+      <h2>Palette</h2>
+      <p>Iron-gall ink and gold leaf, the palette of an old bound book. The ground is a
+      warm soft-black (never pure), the text is ivory, the accent is <b>antique gold</b>, and a moonlit slate
+      is reserved almost exclusively for the particles.</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#111417"></div><div class="info"><b>Ink</b>#111417 · ground</div></div>
+        <div class="swatch"><div class="chip" style="background:#191D21"></div><div class="info"><b>Deep</b>#191D21 · surfaces</div></div>
+        <div class="swatch"><div class="chip" style="background:#F1EEE3"></div><div class="info"><b>Ivory</b>#F1EEE3 · text</div></div>
+        <div class="swatch"><div class="chip" style="background:#A4A79B"></div><div class="info"><b>Stone</b>#A4A79B · secondary</div></div>
+        <div class="swatch"><div class="chip" style="background:#C9A45C"></div><div class="info"><b>Gold</b>#C9A45C · accent</div></div>
+        <div class="swatch"><div class="chip" style="background:#8195A9"></div><div class="info"><b>Slate</b>#8195A9 · particles</div></div>
+      </div>
+    </div>
+
+    <div class="guide-sec">
+      <h2>Typography</h2>
+      <p>Three faces with real pedigree, none of them fashionable defaults: a <b>Goudy Oldstyle revival</b> (1915)
+      for display, a humanist sans for the argument, and a typewriter face for the archival voice.</p>
+      <div class="type-spec">
+        <div class="row"><span class="demo-serif">Intelligence, <em>installed.</em></span><span class="tag">Sorts Mill Goudy · display</span></div>
+        <div class="row"><span class="demo-sans">Body copy carries the argument in a warm humanist sans, sized for a 65-character measure.</span><span class="tag">Alegreya Sans · body</span></div>
+        <div class="row"><span class="demo-mono">Catalog codes · labels · data</span><span class="tag">Courier Prime · utility</span></div>
+      </div>
+      <p style="margin-top:18px">All three faces are subset to Latin and embedded as base64, so the page makes
+      <b>zero external requests</b>.</p>
+    </div>
+
+    <div class="guide-sec">
+      <h2>Motion system</h2>
+      <ul class="guide-list">
+        <li>Particle morphs are scroll-driven: each section declares a target form; transitions ease over ~1.2s with per-particle stagger.</li>
+        <li>Headlines reveal through line masks, and the supporting copy follows a beat later.</li>
+        <li>Ambient drift, mouse parallax and depth-attenuated point sizes keep the field alive between morphs.</li>
+        <li>Everything honors <b>prefers-reduced-motion</b>. Reveals become instant and the field holds still.</li>
+      </ul>
+    </div>
+
+    <div class="guide-sec">
+      <h2>Engineering notes</h2>
+      <ul class="guide-list">
+        <li>One self-contained HTML file, with the fonts, styles, and engine all inlined. No CDNs and nothing to install.</li>
+        <li>Custom GLSL vertex/fragment shaders; positions blended on-GPU, buffers swapped CPU-side at section boundaries to avoid pops.</li>
+        <li>Particle count adapts to device (≈14k desktop / ≈7k mobile); DPR capped at 2 for battery sanity.</li>
+        <li>A small client-side router serves this guide at <b>#/guide</b>, so the link survives a refresh on static hosting.</li>
+      </ul>
+      <a class="back-home" href="/" data-route="home">← Back to the site</a>
+    </div>
+  </div>
+</section>
+
+<script>
+/*__APP__*/
+</script>
