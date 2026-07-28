@@ -6,7 +6,7 @@ const fonts = ['sorts-mill-goudy', 'alegreya-sans', 'courier-prime']
   .join('\n');
 const app = fs.readFileSync(path.join(here, 'app.js'), 'utf8');
 let html = fs.readFileSync(path.join(here, 'src.html'), 'utf8');
-const site2 = process.env.SITE2_URL || '#';
+const site2 = process.env.SITE2_URL || 'https://the-yoon-lab-ai-in-action-cd-37e661397a.netlify.app';
 html = html.replace('/*__FONTS__*/', fonts).replace('/*__APP__*/', () => app).replace(/__SITE2_URL__/g, site2);
 fs.writeFileSync(path.join(here, 'index.html'), html);
 console.log('built index.html', (fs.statSync(path.join(here, 'index.html')).size / 1024).toFixed(0) + 'KB');
