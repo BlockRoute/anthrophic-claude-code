@@ -4,17 +4,24 @@
 <meta charset="UTF-8">
 <title>Listing with Daniel Yoon</title>
 <link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/fonts-italic.css">
 <style>
   @page { size: 654pt 834pt; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --ink: #101010;
-    --charcoal: #232220;
-    --smoke: #4a4844;
-    --stone: #a89f94;
-    --mist: #d9d4cd;
-    --paper: #f7f5f2;
-    --white: #ffffff;
+    /* warm-tinted neutrals (impeccable: never pure black/gray) */
+    --ink: #171310;
+    --charcoal: #27221b;
+    --smoke: #4c463d;
+    --stone: #857b6e;      /* >=3:1 on paper for large type */
+    --mist: #ddd6cb;
+    --paper: #f8f5ef;
+    --card: #fffdf9;
+    --hairline: #e6dfd2;
+    /* single quiet accent, given a deliberate region */
+    --accent: #8a6d47;
+    --accent-soft: #b39a76;
+    --ghost: rgba(138,109,71,.14);
   }
   html, body { background: #444; }
   body { font-family: 'Montserrat', sans-serif; color: var(--ink); }
@@ -30,133 +37,227 @@
 
   /* ---------- footer ---------- */
   .footer {
-    position: absolute; left: 0; right: 0; bottom: 0;
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 5;
     height: 64px; background: var(--ink); color: var(--paper);
+    border-top: 1px solid var(--accent);
     display: flex; align-items: center; padding: 0 44px;
   }
   .footer .brand { display: flex; align-items: center; gap: 14px; }
-  .footer .brand img { width: 40px; height: 40px; object-fit: cover; }
-  .footer .brand .b1 { font-size: 12px; letter-spacing: 3px; font-weight: 600; }
-  .footer .brand .b2 { font-size: 8.5px; letter-spacing: 1.5px; color: var(--stone); margin-top: 3px; }
-  .footer .pageno { flex: 1; text-align: center; font-size: 11px; color: var(--stone); }
-  .footer .contact { font-size: 11.5px; letter-spacing: 2px; font-weight: 600; }
-  .footer .contact span { color: var(--stone); margin: 0 10px; font-weight: 300; }
+  .footer .brand img { width: 36px; height: 36px; object-fit: cover; }
+  .footer .brand .b1 { font-size: 11.5px; letter-spacing: 3.2px; font-weight: 600; }
+  .footer .brand .b2 { font-size: 8px; letter-spacing: 1.8px; color: var(--accent-soft); margin-top: 3px; }
+  .footer .pageno { flex: 1; text-align: center; font-family: 'Playfair Display', serif; font-size: 13px; color: var(--accent-soft); }
+  .footer .contact { font-size: 11px; letter-spacing: 2.2px; font-weight: 500; }
+  .footer .contact i { color: var(--accent-soft); font-style: normal; margin: 0 10px; }
 
-  /* ---------- section tab ---------- */
-  .tab-row { display: flex; justify-content: center; align-items: center; padding-top: 42px; position: relative; }
-  .tab-row::before, .tab-row::after {
-    content: ""; position: absolute; top: 56px; height: 3px; width: 118px; background: var(--stone);
+  /* ---------- running header (non-opener pages) ---------- */
+  .runhead {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin: 40px 64px 0; padding-bottom: 12px;
+    border-bottom: 1px solid var(--hairline);
   }
-  .tab-row::before { left: 44px; } .tab-row::after { right: 44px; }
-  .tab {
+  .runhead .sec { font-size: 9.5px; letter-spacing: 3.5px; font-weight: 600; color: var(--smoke); }
+  .runhead .sec b { color: var(--accent); font-weight: 700; margin-right: 8px; }
+  .runhead .who { font-size: 9.5px; letter-spacing: 3.5px; font-weight: 500; color: var(--stone); }
+
+  /* ---------- section opener band ---------- */
+  .band {
     background: var(--charcoal); color: var(--paper);
-    font-size: 11px; letter-spacing: 4px; font-weight: 600;
-    padding: 8px 38px;
+    height: 132px; display: flex; align-items: center;
+    padding: 0 64px; gap: 26px; position: relative; overflow: hidden;
   }
+  .band .num {
+    font-family: 'Playfair Display', serif; font-size: 72px; font-weight: 500;
+    color: var(--accent-soft); line-height: 1;
+  }
+  .band .bslash { width: 1.5px; height: 74px; background: var(--accent); transform: rotate(24deg); }
+  .band .bsec { font-size: 9.5px; letter-spacing: 4.5px; font-weight: 600; color: var(--accent-soft); margin-bottom: 8px; }
+  .band .bname { font-family: 'Playfair Display', serif; font-size: 27px; letter-spacing: 3.5px; font-weight: 500; text-transform: uppercase; }
+  .band .bghost {
+    position: absolute; right: -30px; top: -70px; width: 2px; height: 300px;
+    background: rgba(179,154,118,.35); transform: rotate(24deg);
+  }
+  .band .bghost2 { right: 10px; background: rgba(179,154,118,.18); }
 
-  /* ---------- heading lockup ---------- */
-  .lockup { display: flex; align-items: center; gap: 22px; margin: 44px 0 8px; }
-  .lockup .mark { width: 74px; height: 74px; object-fit: cover; flex: none; }
-  .lockup .kicker { font-size: 25px; letter-spacing: 6px; font-weight: 300; color: var(--stone); text-transform: uppercase; }
-  .lockup h1 { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; letter-spacing: 2px; color: var(--ink); line-height: 1.02; text-transform: uppercase; }
+  /* ---------- heading lockup: slash + italic kicker + display ---------- */
+  .lockup { display: flex; align-items: center; gap: 24px; margin: 40px 0 6px; position: relative; z-index: 1; }
+  .lockup .slash { width: 2px; height: 84px; background: var(--accent); transform: rotate(24deg); flex: none; margin: 0 10px; }
+  .kicker { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 500; font-size: 27px; color: var(--stone); line-height: 1; }
+  .lockup h1 { font-family: 'Playfair Display', serif; font-size: 47px; font-weight: 700; letter-spacing: 1.5px; color: var(--ink); line-height: 1.06; text-transform: uppercase; margin-top: 8px; }
   .dark .lockup h1 { color: var(--paper); }
-  .lockup.center { justify-content: center; text-align: center; }
-  .lockup .stack { display: flex; flex-direction: column; align-items: flex-start; }
-  .lockup.center .stack { align-items: center; }
 
-  .content { padding: 0 64px; }
+  .content { padding: 0 64px; position: relative; z-index: 1; }
 
   p.body, li.body { font-size: 13.5px; line-height: 1.62; font-weight: 400; color: var(--charcoal); }
-  .dark p.body { color: var(--mist); }
-  .lead { font-size: 14.5px; line-height: 1.65; }
+  .dark p.body { color: var(--mist); letter-spacing: .2px; line-height: 1.7; }
+  .lead { font-size: 14px; line-height: 1.66; }
+  .measure { max-width: 640px; }
+
+  .label { font-size: 10.5px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; }
 
   .bullets { list-style: none; }
-  .bullets li { position: relative; padding-left: 26px; margin-bottom: 16px; font-size: 13px; line-height: 1.55; color: var(--charcoal); }
-  .bullets li::before { content: ""; position: absolute; left: 0; top: 7px; width: 9px; height: 9px; background: var(--stone); }
-  .bullets li b { display: block; letter-spacing: 2.5px; font-size: 12.5px; margin-bottom: 4px; color: var(--ink); text-transform: uppercase; }
+  .bullets li { position: relative; padding-left: 26px; margin-bottom: 15px; font-size: 12.8px; line-height: 1.58; color: var(--charcoal); }
+  .bullets li::before { content: ""; position: absolute; left: 2px; top: 3px; width: 1.5px; height: 14px; background: var(--accent); transform: rotate(24deg); }
+  .bullets li b { display: block; letter-spacing: 2.6px; font-size: 12px; margin-bottom: 4px; color: var(--ink); text-transform: uppercase; }
   .bullets.tight li { margin-bottom: 9px; }
-
-  .rule { height: 3px; background: var(--stone); width: 118px; margin: 18px 0; }
+  .bullets.cols { column-count: 2; column-gap: 34px; }
+  .bullets.cols li { break-inside: avoid; }
 
   .quote {
-    background: var(--white); border-left: 5px solid var(--stone);
-    padding: 26px 32px; box-shadow: 0 2px 14px rgba(0,0,0,.07);
+    background: var(--card); border: 1px solid var(--hairline);
+    padding: 24px 30px 24px 66px; position: relative;
   }
-  .quote .qtext { font-family: 'Playfair Display', serif; font-size: 16px; font-style: italic; line-height: 1.6; color: var(--charcoal); }
-  .quote .qwho { margin-top: 12px; font-size: 11px; letter-spacing: 2.5px; font-weight: 600; color: var(--stone); text-transform: uppercase; }
+  .quote::before {
+    content: "\201C"; position: absolute; left: 18px; top: 30px;
+    font-family: 'Playfair Display', serif; font-size: 58px; line-height: 1;
+    color: var(--accent-soft);
+  }
+  .quote .qtext { font-family: 'Playfair Display', serif; font-size: 15.5px; font-style: italic; line-height: 1.6; color: var(--charcoal); }
+  .quote .qwho { margin-top: 10px; font-size: 10px; letter-spacing: 2.6px; font-weight: 600; color: var(--stone); text-transform: uppercase; }
 
   .card {
-    background: var(--white); padding: 24px 26px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.06);
-    border-top: 4px solid var(--charcoal);
+    background: var(--card); padding: 22px 24px;
+    border: 1px solid var(--hairline);
   }
-  .card h3 { font-size: 13px; letter-spacing: 3px; margin-bottom: 10px; text-transform: uppercase; }
-  .card p, .card li { font-size: 12px; line-height: 1.55; color: var(--smoke); }
+  .card.em { border-top: 3px solid var(--accent); }
+  .card h3 { font-size: 12.5px; letter-spacing: 2.8px; margin-bottom: 9px; text-transform: uppercase; }
+  .card p, .card li { font-size: 11.8px; line-height: 1.55; color: var(--smoke); }
   .card ul { list-style: none; }
-  .card ul li { padding-left: 16px; position: relative; margin-bottom: 6px; }
-  .card ul li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; background: var(--stone); }
+  .card ul li { padding-left: 15px; position: relative; margin-bottom: 6px; }
+  .card ul li::before { content: ""; position: absolute; left: 1px; top: 3px; width: 1.2px; height: 11px; background: var(--accent-soft); transform: rotate(24deg); }
 
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
 
-  .darkpanel { background: var(--ink); color: var(--paper); padding: 30px 36px; }
-  .darkpanel h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 12px; }
-  .darkpanel p, .darkpanel li { color: var(--mist); font-size: 12.5px; line-height: 1.6; }
+  .darkpanel { background: var(--ink); color: var(--paper); padding: 28px 34px; position: relative; overflow: hidden; }
+  .darkpanel h3 { font-family: 'Playfair Display', serif; font-size: 19px; margin-bottom: 10px; letter-spacing: .4px; }
+  .darkpanel p, .darkpanel li { color: var(--mist); font-size: 12px; line-height: 1.65; letter-spacing: .2px; }
+  .darkpanel .dpslash { position: absolute; right: 26px; top: -40px; width: 1.5px; height: 200px; background: rgba(179,154,118,.4); transform: rotate(24deg); }
 
   .smallcaps { letter-spacing: 3px; text-transform: uppercase; font-weight: 600; }
 
-  /* cover */
-  .cover-logo { width: 244px; height: 244px; object-fit: cover; }
-  .cover-photo-frame { position: relative; }
-  .cover-photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photoframe { background: var(--card); border: 1px solid var(--hairline); padding: 12px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%); }
+  .photoframe img { width: 100%; display: block; object-fit: cover;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%); }
 
-  .photoframe { background: var(--white); padding: 12px; box-shadow: 0 4px 22px rgba(0,0,0,.14); }
-  .photoframe img { width: 100%; display: block; object-fit: cover; }
-
-  .label-chip { display: inline-block; background: var(--charcoal); color: var(--paper); font-size: 10.5px; letter-spacing: 3px; font-weight: 600; padding: 7px 18px; text-transform: uppercase; }
+  .label-chip { display: inline-block; background: var(--charcoal); color: var(--paper); font-size: 10px; letter-spacing: 2.8px; font-weight: 600; padding: 7px 18px; text-transform: uppercase; }
+  .label-chip b { color: var(--accent-soft); font-weight: 600; }
 
   .footnote { font-size: 9.5px; color: var(--smoke); line-height: 1.5; font-style: italic; }
+
+  .ghostnum {
+    position: absolute; font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: 300px; line-height: 1; color: var(--ghost); z-index: 0; user-select: none;
+  }
+
+  /* road map */
+  .toc-row { display: flex; align-items: center; gap: 24px; padding: 25px 0; border-bottom: 1px solid var(--hairline); }
+  .toc-row:last-child { border-bottom: none; }
+  .toc-num { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 500; color: var(--accent); width: 76px; flex: none; line-height: 1; }
+  .toc-t { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+  .toc-d { font-size: 11.5px; color: var(--smoke); line-height: 1.5; }
+  .toc-pg { margin-left: auto; flex: none; text-align: right; }
+  .toc-pg .pgn { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--charcoal); }
+  .toc-pg .pgl { font-size: 8.5px; letter-spacing: 2.5px; color: var(--stone); font-weight: 600; margin-top: 2px; }
 </style>
 </head>
 <body>
 
 <!-- ============================== PAGE 1 : COVER ============================== -->
 <div class="page dark">
-  <div style="display:flex; flex-direction:column; align-items:center; padding-top:64px;">
-    <img class="cover-logo" src="assets/dy-logo.jpg" alt="DY monogram">
-    <div style="margin-top:30px; font-size:15px; letter-spacing:8px; color:var(--stone); font-weight:600;">LISTING WITH</div>
-    <div style="font-family:'Playfair Display',serif; font-size:64px; letter-spacing:8px; margin-top:10px; font-weight:500;">DANIEL YOON</div>
-    <div style="display:flex; align-items:center; gap:18px; margin-top:22px;">
-      <div style="height:1px; width:110px; background:var(--stone);"></div>
-      <div style="font-size:11px; letter-spacing:4px; color:var(--stone);">GREATER RICHMOND, VIRGINIA</div>
-      <div style="height:1px; width:110px; background:var(--stone);"></div>
+  <div style="position:absolute; left:118px; top:-120px; width:2px; height:560px; background:rgba(179,154,118,.30); transform:rotate(24deg);"></div>
+  <div style="position:absolute; left:158px; top:-160px; width:1px; height:520px; background:rgba(179,154,118,.16); transform:rotate(24deg);"></div>
+  <div style="display:flex; flex-direction:column; align-items:center; padding-top:58px; position:relative; z-index:1;">
+    <img src="assets/dy-logo.jpg" alt="DY monogram" style="width:216px; height:216px; object-fit:cover;">
+    <div style="margin-top:26px; font-size:14px; letter-spacing:9px; color:var(--accent-soft); font-weight:600;">LISTING WITH</div>
+    <div style="font-family:'Playfair Display',serif; font-size:62px; letter-spacing:8px; margin-top:8px; font-weight:500;">DANIEL YOON</div>
+    <div style="display:flex; align-items:center; gap:16px; margin-top:20px;">
+      <div style="height:1px; width:104px; background:var(--accent);"></div>
+      <div style="font-size:10.5px; letter-spacing:4px; color:var(--mist);">GREATER RICHMOND, VIRGINIA</div>
+      <div style="height:1px; width:104px; background:var(--accent);"></div>
     </div>
   </div>
-  <div style="position:absolute; left:64px; right:64px; top:568px; bottom:150px;" class="cover-photo-frame">
-    <img src="assets/daniel-headshot.jpg" alt="Daniel Yoon" style="object-position: 50% 22%;">
+  <div style="position:absolute; left:64px; right:64px; top:552px; bottom:156px; padding:0; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%);">
+    <img src="assets/daniel-headshot.jpg" alt="Daniel Yoon" style="width:100%; height:100%; object-fit:cover; object-position:50% 22%; display:block;">
   </div>
-  <div style="position:absolute; left:0; right:0; bottom:64px; height:86px; background:var(--charcoal); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-    <div style="font-size:13px; letter-spacing:3px; font-weight:600;">SELLER REPRESENTATIVE SPECIALIST&nbsp;&nbsp;·&nbsp;&nbsp;BROKERED BY EXP REALTY</div>
-    <div style="font-size:11px; letter-spacing:2.5px; color:var(--stone);">804.896.2694&nbsp;&nbsp;|&nbsp;&nbsp;DANIELYOONREALTY.COM</div>
+  <div style="position:absolute; left:0; right:0; bottom:64px; height:92px; background:var(--charcoal); border-top:1px solid var(--accent); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;">
+    <div style="font-size:12px; letter-spacing:3.2px; font-weight:600;">SELLER REPRESENTATIVE SPECIALIST&nbsp;&nbsp;<span style="color:var(--accent-soft);">/</span>&nbsp;&nbsp;BROKERED BY EXP REALTY</div>
+    <div style="font-size:10.5px; letter-spacing:2.8px; color:var(--accent-soft);">804.896.2694&nbsp;&nbsp;/&nbsp;&nbsp;DANIELYOONREALTY.COM</div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
     <div class="pageno"></div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 2 : MEET DANIEL ============================== -->
+<!-- ============================== PAGE 2 : ROAD MAP ============================== -->
 <div class="page">
-  <div style="height:508px; background:var(--charcoal); position:relative;">
-    <div style="position:absolute; left:64px; top:56px; width:390px;">
-      <div style="font-size:22px; letter-spacing:6px; color:var(--stone); font-weight:300;">MEET</div>
-      <div style="font-family:'Playfair Display',serif; font-size:58px; color:var(--paper); font-weight:700; letter-spacing:2px;">DANIEL</div>
-      <div class="rule"></div>
-      <p class="body" style="color:var(--mist); font-size:13px;">Thank you for the opportunity to talk about the sale of your home. This guide walks through exactly how I price, prepare, market, and negotiate a listing — so you know what to expect at every step, from our first conversation to the closing table.</p>
-      <div style="margin-top:30px;">
-        <div class="smallcaps" style="font-size:11px; color:var(--stone); margin-bottom:12px;">Contact</div>
-        <div style="color:var(--paper); font-size:13px; line-height:2.05;">
+  <div class="ghostnum" style="right:-40px; top:-60px;">/</div>
+  <div class="runhead"><div class="sec"><b>DY</b> THE PLAN FOR YOUR SALE</div><div class="who">DANIEL YOON</div></div>
+  <div class="content">
+    <div class="lockup">
+      <div class="slash"></div>
+      <div><div class="kicker">the</div><h1>Road Map</h1></div>
+    </div>
+    <p class="body measure">Five stages, in the order we&rsquo;ll travel them. Every page in this guide belongs to one of these stages — so at any point in your sale, you&rsquo;ll know exactly where we are and what comes next.</p>
+    <div style="margin-top:26px;">
+      <div class="toc-row">
+        <div class="toc-num">01</div>
+        <div><div class="toc-t">Get to Know Me</div><div class="toc-d">Who you&rsquo;re hiring, how I work, and the credentials behind the strategy.</div></div>
+        <div class="toc-pg"><div class="pgn">3 &ndash; 5</div><div class="pgl">PAGES</div></div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">02</div>
+        <div><div class="toc-t">Market Analysis</div><div class="toc-d">What actually determines your home&rsquo;s value — and the pricing strategy that captures it.</div></div>
+        <div class="toc-pg"><div class="pgn">6 &ndash; 7</div><div class="pgl">PAGES</div></div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">03</div>
+        <div><div class="toc-t">Preparing for Market</div><div class="toc-d">Inspections, staging, and the trade network that gets your home debut-ready.</div></div>
+        <div class="toc-pg"><div class="pgn">8 &ndash; 10</div><div class="pgl">PAGES</div></div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">04</div>
+        <div><div class="toc-t">Marketing Strategy</div><div class="toc-d">Photography, exposure, showings — putting your home everywhere buyers look.</div></div>
+        <div class="toc-pg"><div class="pgn">11 &ndash; 16</div><div class="pgl">PAGES</div></div>
+      </div>
+      <div class="toc-row">
+        <div class="toc-num">05</div>
+        <div><div class="toc-t">Offer to Close</div><div class="toc-d">Negotiation, appraisal, and every step between a strong offer and a smooth closing.</div></div>
+        <div class="toc-pg"><div class="pgn">17 &ndash; 21</div><div class="pgl">PAGES</div></div>
+      </div>
+    </div>
+    <div class="darkpanel" style="margin-top:24px;"><div class="dpslash"></div>
+      <h3>One agent. Every step.</h3>
+      <p>You won&rsquo;t be handed off between departments. From this first meeting to the closing table, you work directly with me — and I answer for every stage of this map.</p>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
+    <div class="pageno">2</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 3 : MEET DANIEL (01 opener) ============================== -->
+<div class="page">
+  <div class="band">
+    <div class="num">01</div>
+    <div class="bslash"></div>
+    <div><div class="bsec">SECTION ONE</div><div class="bname">Get to Know Me</div></div>
+    <div class="bghost"></div><div class="bghost bghost2"></div>
+  </div>
+  <div style="height:456px; background:var(--charcoal); position:relative;">
+    <div style="position:absolute; left:64px; top:44px; width:380px;">
+      <div class="kicker" style="color:var(--accent-soft);">meet</div>
+      <div style="font-family:'Playfair Display',serif; font-size:56px; color:var(--paper); font-weight:700; letter-spacing:2px;">DANIEL</div>
+      <div style="height:2px; width:104px; background:var(--accent); margin:16px 0;"></div>
+      <p class="body" style="color:var(--mist); font-size:12.5px; line-height:1.7; letter-spacing:.2px;">Thank you for the opportunity to talk about the sale of your home. This guide walks through exactly how I price, prepare, market, and negotiate a listing — so you know what to expect at every step, from our first conversation to the closing table.</p>
+      <div style="margin-top:24px;">
+        <div class="label" style="font-size:9.5px; color:var(--accent-soft); margin-bottom:10px;">Contact</div>
+        <div style="color:var(--paper); font-size:12.5px; line-height:2.05; letter-spacing:.3px;">
           804.896.2694<br>
           daniel.yoon@exprealty.com<br>
           www.DanielYoonRealty.com<br>
@@ -164,33 +265,37 @@
         </div>
       </div>
     </div>
-    <div class="photoframe" style="position:absolute; right:64px; top:64px; width:298px;">
-      <img src="assets/daniel-seated.png" alt="Daniel Yoon portrait" style="height:520px; object-position:50% 12%;">
+    <div class="photoframe" style="position:absolute; right:64px; top:52px; width:300px;">
+      <img src="assets/daniel-seated.png" alt="Daniel Yoon portrait" style="height:508px; object-position:50% 12%;">
     </div>
   </div>
-  <div style="padding: 130px 64px 0 64px; width:470px;">
-    <div style="font-family:'Playfair Display',serif; font-size:30px; font-weight:700; margin-bottom:16px;">My Mission</div>
-    <p class="body lead" style="font-style:italic;">&ldquo;Selling a home is one of the biggest financial decisions most families ever make — and it deserves more than a sign in the yard. My commitment is to guide you with honesty, preparation, and relentless communication, to market your home like it matters, and to negotiate every dollar as if it were my own. My goal isn&rsquo;t just a closed sale; it&rsquo;s a client who would refer me to the people they care about.&rdquo;</p>
-    <div style="margin-top:18px;" class="smallcaps" >— Daniel Yoon</div>
+  <div style="padding:122px 64px 0; width:490px; position:relative;">
+    <div class="lockup" style="margin:0 0 14px;">
+      <div class="slash" style="height:60px;"></div>
+      <div><div class="kicker" style="font-size:23px;">my</div><h1 style="font-size:34px;">Mission</h1></div>
+    </div>
+    <p class="body lead" style="font-style:italic; font-family:'Playfair Display',serif; font-size:14.5px;">&ldquo;Selling a home is one of the biggest financial decisions most families ever make — and it deserves more than a sign in the yard. My commitment is to guide you with honesty, preparation, and relentless communication, to market your home like it matters, and to negotiate every dollar as if it were my own. My goal isn&rsquo;t just a closed sale; it&rsquo;s a client who would refer me to the people they care about.&rdquo;</p>
+    <div style="margin-top:14px;" class="label">&mdash; Daniel Yoon</div>
   </div>
+  <div class="ghostnum" style="right:6px; bottom:30px; font-size:250px;">01</div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">2</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">3</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 3 : FULL-SERVICE EXPERIENCE ============================== -->
+<!-- ============================== PAGE 4 : FULL-SERVICE EXPERIENCE ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">GET TO KNOW ME</div></div>
+  <div class="runhead"><div class="sec"><b>01</b> GET TO KNOW ME</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Full-Service</div><h1>Listing Experience</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">the full-service</div><h1>Listing Experience</h1></div>
     </div>
-    <p class="body" style="margin-top:10px;">Every listing I take on gets my full attention from day one to closing day. You&rsquo;ll have one point of contact — me — backed by the resources, technology, and national network of eXp Realty. Here is what that looks like in practice:</p>
-    <div class="grid2" style="margin-top:28px;">
-      <div class="card">
+    <p class="body measure" style="margin-top:6px;">Every listing I take on gets my full attention from day one to closing day. You&rsquo;ll have one point of contact — me — backed by the resources, technology, and national network of eXp Realty. Here is what that looks like in practice:</p>
+    <div class="grid2" style="margin-top:24px;">
+      <div class="card em">
         <h3>Strategy &amp; Pricing</h3>
         <ul>
           <li>In-depth comparative market analysis</li>
@@ -198,7 +303,7 @@
           <li>Honest guidance on value — not inflated promises</li>
         </ul>
       </div>
-      <div class="card">
+      <div class="card em">
         <h3>Preparation &amp; Staging</h3>
         <ul>
           <li>Room-by-room walk-through with prep recommendations</li>
@@ -206,7 +311,7 @@
           <li>Coordination of photography, signage, and lockbox</li>
         </ul>
       </div>
-      <div class="card">
+      <div class="card em">
         <h3>Marketing &amp; Exposure</h3>
         <ul>
           <li>Professional photography and MLS-ready media</li>
@@ -214,7 +319,7 @@
           <li>Social and digital campaigns targeting active buyers</li>
         </ul>
       </div>
-      <div class="card">
+      <div class="card em">
         <h3>Negotiation to Closing</h3>
         <ul>
           <li>Offer review, negotiation, and contract management</li>
@@ -223,70 +328,73 @@
         </ul>
       </div>
     </div>
-    <div class="darkpanel" style="margin-top:28px;">
+    <div class="darkpanel" style="margin-top:24px;"><div class="dpslash"></div>
       <h3>Backed by eXp Realty</h3>
       <p>eXp Realty is one of the largest independent real estate brokerages in North America, with agents across the United States and around the world. That gives your listing a referral network that reaches far beyond Richmond — and gives you an agent supported by industry-leading technology, transaction support, and training.</p>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">3</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">4</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 4 : CREDENTIALS ============================== -->
+<!-- ============================== PAGE 5 : CREDENTIALS ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">GET TO KNOW ME</div></div>
+  <div class="runhead"><div class="sec"><b>01</b> GET TO KNOW ME</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Credentials &amp;</div><h1>Designations</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">credentials &amp;</div><h1>Designations</h1></div>
     </div>
-    <div style="display:flex; gap:30px; margin-top:14px; align-items:flex-start;">
-      <div style="flex:1;">
-        <p class="body">Real estate credentials aren&rsquo;t wall decorations — they represent focused training in the exact skills a seller depends on: pricing, marketing, and negotiation. I&rsquo;ve invested in three designations that directly benefit my listing clients.</p>
-      </div>
-      <div class="photoframe" style="width:190px; flex:none;">
-        <img src="assets/daniel-headshot.jpg" alt="Daniel Yoon" style="height:190px; object-position:50% 20%;">
+    <div style="display:flex; gap:28px; margin-top:8px; align-items:flex-start;">
+      <p class="body" style="flex:1;">Real estate credentials aren&rsquo;t wall decorations — they represent focused training in the exact skills a seller depends on: pricing, marketing, and negotiation. I&rsquo;ve invested in three designations that directly benefit my listing clients.</p>
+      <div class="photoframe" style="width:178px; flex:none;">
+        <img src="assets/daniel-headshot.jpg" alt="Daniel Yoon" style="height:178px; object-position:50% 20%;">
       </div>
     </div>
-    <div style="margin-top:6px;">
-      <div class="card" style="margin-bottom:18px;">
+    <div style="margin-top:4px;">
+      <div class="card em" style="margin-bottom:16px;">
         <h3>Seller Representative Specialist (SRS)</h3>
         <p>The premier credential in seller representation. SRS training focuses on advanced pricing strategy, listing marketing, and negotiation — the skills that determine how much your home sells for and how smoothly it closes.</p>
       </div>
-      <div class="card" style="margin-bottom:18px;">
+      <div class="card em" style="margin-bottom:16px;">
         <h3>Accredited Buyer&rsquo;s Representative (ABR)</h3>
         <p>Understanding exactly how buyers and their agents think is a seller&rsquo;s advantage. ABR training means I can anticipate how buyers will evaluate your home, structure their offers, and approach negotiations — and position you accordingly.</p>
       </div>
-      <div class="card" style="margin-bottom:18px;">
+      <div class="card em" style="margin-bottom:16px;">
         <h3>Certified New Home Co-broker (CNHC)</h3>
         <p>Specialized training in new-construction transactions. If your buyer pool includes people weighing your home against new builds — common across the Greater Richmond market — I know how builders sell, and how to compete with them.</p>
       </div>
     </div>
-    <div class="darkpanel">
+    <div class="darkpanel"><div class="dpslash"></div>
       <h3>Rooted in Greater Richmond</h3>
       <p>From the city neighborhoods to Henrico, Chesterfield, Hanover, and beyond — I work the Greater Richmond market every day. Local pricing knowledge, local buyer patterns, and local professional relationships all go to work for your sale.</p>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">4</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">5</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 5 : KEY MARKET FACTORS ============================== -->
+<!-- ============================== PAGE 6 : KEY MARKET FACTORS (02 opener) ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">COMPARATIVE MARKET ANALYSIS</div></div>
+  <div class="band">
+    <div class="num">02</div>
+    <div class="bslash"></div>
+    <div><div class="bsec">SECTION TWO</div><div class="bname">Market Analysis</div></div>
+    <div class="bghost"></div><div class="bghost bghost2"></div>
+  </div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Key Market</div><h1>Factors</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">key market</div><h1>Factors</h1></div>
     </div>
-    <div class="label-chip" style="margin:8px 0 22px;">The right balance of these factors sells your home faster — and for more</div>
-    <div style="display:flex; gap:30px;">
+    <div class="label-chip" style="margin:4px 0 20px;">The right balance of these factors sells your home faster <b>/</b> and for more</div>
+    <div style="display:flex; gap:28px;">
       <ul class="bullets" style="flex:1;">
         <li><b>Pricing</b>Nothing influences your result more than the price your home debuts at. A well-priced home creates urgency; an overpriced one funds the sale of your neighbors&rsquo; homes.</li>
         <li><b>Condition</b>Buyers decide with their emotions first and their calculators second. Presentation — cleanliness, repairs, staging — directly changes what buyers believe your home is worth.</li>
@@ -294,488 +402,532 @@
         <li><b>Timing</b>A listing gets its most attention in its first few weeks on market. We&rsquo;ll make sure your home is fully ready before it debuts, so that window isn&rsquo;t wasted.</li>
         <li><b>Location</b>Location sets the ceiling on value. We can&rsquo;t move the house — but we can market the neighborhood, schools, and lifestyle that come with it.</li>
       </ul>
-      <div style="width:250px; flex:none;">
-        <div class="darkpanel" style="padding:26px 28px;">
-          <h3 style="font-size:17px;">Within Your Control</h3>
-          <ul style="list-style:none; margin-top:10px;">
-            <li style="padding:9px 0; border-bottom:1px solid #3a3936;">Price</li>
-            <li style="padding:9px 0; border-bottom:1px solid #3a3936;">Property condition</li>
-            <li style="padding:9px 0; border-bottom:1px solid #3a3936;">Staging &amp; presentation</li>
+      <div style="width:248px; flex:none;">
+        <div class="darkpanel" style="padding:24px 26px;"><div class="dpslash"></div>
+          <h3 style="font-size:16px;">Within Your Control</h3>
+          <ul style="list-style:none; margin-top:8px;">
+            <li style="padding:9px 0; border-bottom:1px solid #3b352c;">Price</li>
+            <li style="padding:9px 0; border-bottom:1px solid #3b352c;">Property condition</li>
+            <li style="padding:9px 0; border-bottom:1px solid #3b352c;">Staging &amp; presentation</li>
             <li style="padding:9px 0;">Showing availability</li>
           </ul>
         </div>
-        <div class="quote" style="margin-top:24px;">
-          <div class="qtext">The market sets the value. Our job is to make sure the market sees your home at its absolute best.</div>
+        <div class="quote" style="margin-top:20px; padding:22px 22px 22px 54px;">
+          <div class="qtext" style="font-size:14px;">The market sets the value. Our job is to make sure the market sees your home at its absolute best.</div>
         </div>
       </div>
     </div>
   </div>
+  <div class="ghostnum" style="right:10px; bottom:22px; font-size:230px;">02</div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">5</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">6</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 6 : PRICING YOUR LISTING ============================== -->
+<!-- ============================== PAGE 7 : PRICING YOUR LISTING ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">COMPARATIVE MARKET ANALYSIS</div></div>
+  <div class="runhead"><div class="sec"><b>02</b> MARKET ANALYSIS</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Pricing Your</div><h1>Listing</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">pricing your</div><h1>Listing</h1></div>
     </div>
-    <p class="body">Pricing at true market value from the first day on market matters more than any other decision we&rsquo;ll make together. Historically, the strongest offers tend to arrive early — from buyers who have been watching and waiting for the right home. Price attracts them; overpricing filters them out.</p>
+    <p class="body measure">Pricing at true market value from the first day on market matters more than any other decision we&rsquo;ll make together. Historically, the strongest offers tend to arrive early — from buyers who have been watching and waiting for the right home. Price attracts them; overpricing filters them out.</p>
 
-    <div style="margin-top:24px; text-align:center;">
-      <div class="smallcaps" style="font-size:12px; margin-bottom:14px;">Asking price vs. buyers who will view the property</div>
-      <svg width="744" height="330" viewBox="0 0 744 330" style="max-width:100%;">
+    <div style="margin-top:22px; text-align:center;">
+      <div class="label" style="font-size:11px; margin-bottom:12px; color:var(--smoke);">Asking price <span style="color:var(--accent);">/</span> buyers who will view the property</div>
+      <svg width="744" height="312" viewBox="0 0 744 312" style="max-width:100%;">
         <g font-family="Montserrat" font-size="13">
-          <rect x="395" y="10"  width="120" height="50" fill="#232220"/>
-          <rect x="350" y="70"  width="210" height="50" fill="#3a3833"/>
-          <rect x="300" y="130" width="310" height="50" fill="#5a564f"/>
-          <rect x="245" y="190" width="420" height="50" fill="#8b8378"/>
-          <rect x="185" y="250" width="540" height="50" fill="#a89f94"/>
-          <text x="455" y="41"  fill="#f7f5f2" text-anchor="middle" font-weight="700">10%</text>
-          <text x="455" y="101" fill="#f7f5f2" text-anchor="middle" font-weight="700">30%</text>
-          <text x="455" y="161" fill="#f7f5f2" text-anchor="middle" font-weight="700">60%</text>
-          <text x="455" y="221" fill="#f7f5f2" text-anchor="middle" font-weight="700">75%</text>
-          <text x="455" y="281" fill="#101010" text-anchor="middle" font-weight="700">90%</text>
-          <text x="170" y="41"  fill="#4a4844" text-anchor="end" font-size="12">+15% above market</text>
-          <text x="170" y="101" fill="#4a4844" text-anchor="end" font-size="12">+10% above market</text>
-          <text x="170" y="161" fill="#4a4844" text-anchor="end" font-size="12" font-weight="700">MARKET VALUE</text>
-          <text x="170" y="221" fill="#4a4844" text-anchor="end" font-size="12">-10% below market</text>
-          <text x="170" y="281" fill="#4a4844" text-anchor="end" font-size="12">-15% below market</text>
+          <line x1="185" y1="4" x2="185" y2="296" stroke="#e6dfd2" stroke-width="1"/>
+          <rect x="395" y="8"   width="120" height="46" fill="#27221b"/>
+          <rect x="350" y="66"  width="210" height="46" fill="#4c463d"/>
+          <rect x="300" y="124" width="310" height="46" fill="#8a6d47"/>
+          <rect x="245" y="182" width="420" height="46" fill="#b3a696"/>
+          <rect x="185" y="240" width="540" height="46" fill="#d5ccbe"/>
+          <text x="455" y="36"  fill="#f8f5ef" text-anchor="middle" font-weight="700">10%</text>
+          <text x="455" y="94"  fill="#f8f5ef" text-anchor="middle" font-weight="700">30%</text>
+          <text x="455" y="152" fill="#f8f5ef" text-anchor="middle" font-weight="700">60%</text>
+          <text x="455" y="210" fill="#171310" text-anchor="middle" font-weight="700">75%</text>
+          <text x="455" y="268" fill="#171310" text-anchor="middle" font-weight="700">90%</text>
+          <text x="170" y="36"  fill="#4c463d" text-anchor="end" font-size="12">+15% above market</text>
+          <text x="170" y="94"  fill="#4c463d" text-anchor="end" font-size="12">+10% above market</text>
+          <text x="170" y="152" fill="#8a6d47" text-anchor="end" font-size="12" font-weight="700">MARKET VALUE</text>
+          <text x="170" y="210" fill="#4c463d" text-anchor="end" font-size="12">-10% below market</text>
+          <text x="170" y="268" fill="#4c463d" text-anchor="end" font-size="12">-15% below market</text>
         </g>
       </svg>
     </div>
 
-    <div class="darkpanel" style="margin-top:18px; display:flex; align-items:center; gap:28px;">
-      <div style="font-family:'Playfair Display',serif; font-size:22px; flex:none;">Price is a magnet.</div>
-      <p style="font-size:12.5px;">A home priced at market value pulls in the largest possible pool of qualified buyers — and more qualified buyers means more showings, stronger offers, and better terms. Price above the market and the magnet weakens; the buyers simply tour something else.</p>
+    <div class="darkpanel" style="margin-top:16px; display:flex; align-items:center; gap:26px;">
+      <svg width="86" height="74" viewBox="0 0 86 74" style="flex:none;">
+        <path d="M14 8 L14 34 A18 18 0 0 0 50 34 L50 8" fill="none" stroke="#b39a76" stroke-width="9"/>
+        <rect x="9" y="4" width="10" height="12" fill="#f8f5ef"/>
+        <rect x="45" y="4" width="10" height="12" fill="#f8f5ef"/>
+        <circle cx="70" cy="14" r="3" fill="#8a6d47"/>
+        <circle cx="78" cy="30" r="3" fill="#b39a76"/>
+        <circle cx="69" cy="47" r="3" fill="#d5ccbe"/>
+        <circle cx="78" cy="62" r="3" fill="#8a6d47"/>
+      </svg>
+      <div>
+        <h3 style="margin-bottom:6px;">Price is a magnet.</h3>
+        <p style="font-size:12px;">A home priced at market value pulls in the largest possible pool of qualified buyers — and more qualified buyers means more showings, stronger offers, and better terms. Price above the market and the magnet weakens; the buyers simply tour something else.</p>
+      </div>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">6</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">7</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 7 : INSPECTIONS ============================== -->
+<!-- ============================== PAGE 8 : INSPECTIONS (03 opener) ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">PREPARING TO HIT THE MARKET</div></div>
+  <div class="band">
+    <div class="num">03</div>
+    <div class="bslash"></div>
+    <div><div class="bsec">SECTION THREE</div><div class="bname">Preparing for Market</div></div>
+    <div class="bghost"></div><div class="bghost bghost2"></div>
+  </div>
   <div class="content">
-    <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Property</div><h1>Inspections</h1></div>
+    <div class="lockup" style="margin-top:32px;">
+      <div class="slash"></div>
+      <div><div class="kicker">property</div><h1>Inspections</h1></div>
     </div>
-    <p class="body">In Virginia, most buyers write a home inspection contingency into their offer — typically a window of about 7&ndash;10 days after ratification to have the property professionally inspected. Based on the report, the buyer can accept the home as-is, request repairs or credits, or in many cases walk away. Inspection surprises are one of the most common reasons a contract falls apart, so we prepare for the inspection <i>before</i> we ever list.</p>
-    <div class="grid3" style="margin-top:24px;">
+    <p class="body" style="font-size:12.8px;">In Virginia, most buyers write a home inspection contingency into their offer — typically a window of about 7&ndash;10 days after ratification to have the property professionally inspected. Based on the report, the buyer can accept the home as-is, request repairs or credits, or in many cases walk away. Inspection surprises are one of the most common reasons a contract falls apart, so we prepare for the inspection <i>before</i> we ever list.</p>
+    <div class="grid3" style="margin-top:20px;">
       <div class="card" style="text-align:center;">
-        <div style="font-size:30px; margin-bottom:8px;">&#9825;</div>
-        <h3 style="font-size:11.5px;">How the Seller Sees It</h3>
+        <svg width="38" height="38" viewBox="0 0 38 38" style="margin-bottom:8px;"><path d="M19 32 C6 22 3 14 8 9 C12 5 17 7 19 11 C21 7 26 5 30 9 C35 14 32 22 19 32 Z" fill="none" stroke="#27221b" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <h3 style="font-size:10.5px;">How the Seller Sees It</h3>
         <p>Years of memories, upgrades, and pride of ownership.</p>
       </div>
       <div class="card" style="text-align:center;">
-        <div style="font-size:30px; margin-bottom:8px;">&#9878;</div>
-        <h3 style="font-size:11.5px;">How the Buyer Sees It</h3>
+        <svg width="38" height="38" viewBox="0 0 38 38" style="margin-bottom:8px;"><g fill="none" stroke="#27221b" stroke-width="1.8" stroke-linejoin="round"><line x1="19" y1="5" x2="19" y2="30"/><line x1="7" y1="10" x2="31" y2="10"/><path d="M7 10 L3 20 A5.5 4.5 0 0 0 11 20 Z"/><path d="M31 10 L27 20 A5.5 4.5 0 0 0 35 20 Z"/><line x1="13" y1="33" x2="25" y2="33"/></g></svg>
+        <h3 style="font-size:10.5px;">How the Buyer Sees It</h3>
         <p>A major purchase they&rsquo;re anxious not to get wrong.</p>
       </div>
       <div class="card" style="text-align:center;">
-        <div style="font-size:30px; margin-bottom:8px;">&#128269;</div>
-        <h3 style="font-size:11.5px;">How the Inspector Sees It</h3>
+        <svg width="38" height="38" viewBox="0 0 38 38" style="margin-bottom:8px;"><g fill="none" stroke="#27221b" stroke-width="1.8"><circle cx="16" cy="16" r="10"/><line x1="23.5" y1="23.5" x2="33" y2="33"/></g></svg>
+        <h3 style="font-size:10.5px;">How the Inspector Sees It</h3>
         <p>A checklist of every system, seam, and shingle.</p>
       </div>
     </div>
-    <div class="label-chip" style="margin:26px 0 16px;">Two ways to protect your sale before it starts</div>
+    <div class="label-chip" style="margin:22px 0 14px;">Two ways to protect your sale <b>/</b> before it starts</div>
     <ul class="bullets">
       <li><b>Handle Deferred Maintenance Now</b>Nobody knows your home&rsquo;s quirks better than you. Fixing the leaky faucet, the sticking door, and the tripped GFCI before listing costs far less than the same items do at the negotiating table — where every flaw gets priced at retail. A well-maintained home inspects better, sells faster, and keeps buyers confident.</li>
       <li><b>Consider a Home Warranty</b>A one-year home warranty (typically a few hundred dollars) reassures buyers that covered systems and appliances are protected after closing. Buyers frequently ask sellers to provide one anyway — putting a transferable plan in place early can neutralize that request and calm inspection nerves on both sides.</li>
     </ul>
   </div>
+  <div class="ghostnum" style="right:6px; bottom:26px; font-size:210px;">03</div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">7</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">8</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 8 : HOME STAGING ============================== -->
+<!-- ============================== PAGE 9 : HOME STAGING ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">PREPARING TO HIT THE MARKET</div></div>
+  <div class="runhead"><div class="sec"><b>03</b> PREPARING FOR MARKET</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Home</div><h1>Staging</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">home</div><h1>Staging</h1></div>
     </div>
-    <p class="body">After pricing, presentation is the most powerful lever you control. Before your home is photographed, we&rsquo;ll walk it together room by room and build a focused prep list — what to declutter, what to touch up, and what to leave alone. The goal isn&rsquo;t a magazine shoot; it&rsquo;s helping buyers instantly picture themselves living there.</p>
-    <ul class="bullets" style="margin-top:22px;">
+    <p class="body measure">After pricing, presentation is the most powerful lever you control. Before your home is photographed, we&rsquo;ll walk it together room by room and build a focused prep list — what to declutter, what to touch up, and what to leave alone. The goal isn&rsquo;t a magazine shoot; it&rsquo;s helping buyers instantly picture themselves living there.</p>
+    <ul class="bullets" style="margin-top:20px;">
       <li><b>Curb Appeal</b>Fresh mulch, trimmed shrubs, and a mowed lawn are the baseline. Small touches — pressure washing, a re-stained front door, polished hardware, a working doorbell — set the tone before buyers ever step inside.</li>
       <li><b>Kitchens &amp; Bathrooms</b>These rooms carry the sale. Clear the counters, make appliances and glass shine, and tuck away everyday items like toothbrushes and cleaning products for photos and showings.</li>
       <li><b>Flooring</b>Worn carpet is one of the most common buyer objections. Replace it if it&rsquo;s tired, deep-clean it if it&rsquo;s salvageable, and refresh tile grout — floors quietly signal how well the whole home was kept.</li>
       <li><b>Walls &amp; Trim</b>Fresh, neutral paint is consistently the highest-return dollar you can spend preparing a home. Crisp walls and trim read as &ldquo;move-in ready&rdquo; — and buyers pay for move-in ready.</li>
     </ul>
-    <div class="darkpanel" style="margin-top:14px;">
+    <div class="darkpanel" style="margin-top:12px;"><div class="dpslash"></div>
       <h3>Quick Wins Before Every Showing</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 30px;">
-        <p>&bull;&nbsp; Remove entry, kitchen, and bath mats to open up floor space</p>
-        <p>&bull;&nbsp; Clean windows inside and out</p>
-        <p>&bull;&nbsp; Match all light bulbs and replace any that are out</p>
-        <p>&bull;&nbsp; Keep scents subtle — strong fragrance reads as a cover-up</p>
-        <p>&bull;&nbsp; Stow pet bowls, beds, and litter boxes out of sight</p>
-        <p>&bull;&nbsp; When in doubt, less: fewer items make rooms feel larger</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 28px;">
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Remove entry, kitchen, and bath mats to open up floor space</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Clean windows inside and out</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Match all light bulbs and replace any that are out</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Keep scents subtle — strong fragrance reads as a cover-up</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Stow pet bowls, beds, and litter boxes out of sight</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; When in doubt, less: fewer items make rooms feel larger</p>
       </div>
     </div>
-  </div>
-  <div class="footer">
-    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">8</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
-  </div>
-</div>
-
-<!-- ============================== PAGE 9 : VENDOR NETWORK ============================== -->
-<div class="page">
-  <div class="tab-row"><div class="tab">PREPARING TO HIT THE MARKET</div></div>
-  <div class="content">
-    <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Trusted</div><h1>Vendor Network</h1></div>
+    <div class="quote" style="margin-top:20px;">
+      <div class="qtext">Buyers don&rsquo;t purchase square footage — they purchase the feeling of home. Staging is how we sell the feeling.</div>
     </div>
-    <p class="body">Getting a home market-ready usually takes a few good tradespeople. I maintain a working network of Richmond-area professionals across the categories below, and I&rsquo;ll connect you with the right people for your specific prep list — with personal referrals provided on request.</p>
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-top:26px;">
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">HVAC</h3><p>Service, repair &amp; duct cleaning</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Plumbing</h3><p>Repairs &amp; fixture updates</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Electrical</h3><p>Licensed electricians</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Roofing</h3><p>Repair &amp; replacement</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Painting</h3><p>Interior &amp; exterior</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Handyman</h3><p>Punch lists &amp; small repairs</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Flooring</h3><p>Carpet, hardwood &amp; LVP</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Cleaning</h3><p>Deep clean &amp; move-out</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Carpet &amp; Tile Care</h3><p>Steam cleaning &amp; grout</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Landscaping</h3><p>Cleanups &amp; curb appeal</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Pressure Washing</h3><p>Siding, decks &amp; walks</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Windows</h3><p>Cleaning, glass &amp; blinds</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">General Contractors</h3><p>Larger pre-sale projects</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Home Inspectors</h3><p>Pre-listing inspections</p></div>
-      <div class="card" style="padding:16px 18px;"><h3 style="font-size:11px; margin-bottom:4px;">Movers</h3><p>Local &amp; long distance</p></div>
-    </div>
-    <p class="footnote" style="margin-top:26px;">While I refer professionals whose work I trust, I cannot guarantee or warrant the work or business practices of any independent vendor. Please do your own due diligence when selecting any service provider.</p>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
     <div class="pageno">9</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 10 : PHOTOGRAPHY ============================== -->
+<!-- ============================== PAGE 10 : VENDOR NETWORK ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">MARKETING STRATEGY</div></div>
+  <div class="runhead"><div class="sec"><b>03</b> PREPARING FOR MARKET</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Professional</div><h1>Photography</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">trusted</div><h1>Vendor Network</h1></div>
     </div>
-    <ul class="bullets" style="margin-top:16px;">
+    <p class="body measure">Getting a home market-ready usually takes a few good tradespeople. I maintain a working network of Richmond-area professionals across the categories below, and I&rsquo;ll connect you with the right people for your specific prep list — with personal referrals provided on request.</p>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:13px; margin-top:22px;">
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">HVAC</h3><p>Service, repair &amp; duct cleaning</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Plumbing</h3><p>Repairs &amp; fixture updates</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Electrical</h3><p>Licensed electricians</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Roofing</h3><p>Repair &amp; replacement</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Painting</h3><p>Interior &amp; exterior</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Handyman</h3><p>Punch lists &amp; small repairs</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Flooring</h3><p>Carpet, hardwood &amp; LVP</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Cleaning</h3><p>Deep clean &amp; move-out</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Carpet &amp; Tile Care</h3><p>Steam cleaning &amp; grout</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Landscaping</h3><p>Cleanups &amp; curb appeal</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Pressure Washing</h3><p>Siding, decks &amp; walks</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Windows</h3><p>Cleaning, glass &amp; blinds</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">General Contractors</h3><p>Larger pre-sale projects</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Home Inspectors</h3><p>Pre-listing inspections</p></div>
+      <div class="card" style="padding:15px 17px;"><h3 style="font-size:10.5px; margin-bottom:4px;">Movers</h3><p>Local &amp; long distance</p></div>
+    </div>
+    <div class="darkpanel" style="margin-top:22px;"><div class="dpslash"></div>
+      <h3>The Right Crew, On Call</h3>
+      <p>One conversation about your prep list, and I&rsquo;ll line up the introductions — so you spend your energy on moving, not on vetting contractors.</p>
+    </div>
+    <p class="footnote" style="margin-top:14px;">While I refer professionals whose work I trust, I cannot guarantee or warrant the work or business practices of any independent vendor. Please do your own due diligence when selecting any service provider.</p>
+  </div>
+  <div class="footer">
+    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
+    <div class="pageno">10</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 11 : PHOTOGRAPHY (04 opener) ============================== -->
+<div class="page">
+  <div class="band">
+    <div class="num">04</div>
+    <div class="bslash"></div>
+    <div><div class="bsec">SECTION FOUR</div><div class="bname">Marketing Strategy</div></div>
+    <div class="bghost"></div><div class="bghost bghost2"></div>
+  </div>
+  <div class="content">
+    <div class="lockup" style="margin-top:32px;">
+      <div class="slash"></div>
+      <div><div class="kicker">professional</div><h1>Photography</h1></div>
+    </div>
+    <ul class="bullets" style="margin-top:8px;">
       <li><b>Where First Impressions Happen</b>Nearly every buyer&rsquo;s first showing is on a screen. From dozens of online listings, buyers shortlist a handful of homes to tour in person — and photography is what gets your home onto that shortlist. We only get one debut, so we make it count.</li>
       <li><b>Magazine-Quality Media</b>Your home will be professionally photographed and edited, capturing every room at its best. Where it benefits the home, we can add twilight photography and aerial shots — and skip them where they wouldn&rsquo;t flatter (a small lot rarely benefits from a drone).</li>
       <li><b>Ready for Every Format</b>The same media powers your MLS listing, the major search portals, social campaigns, and print materials — one consistent, polished presentation of your home everywhere buyers look.</li>
       <li><b>Once We&rsquo;re Photographed</b>Sign in the yard, lockbox on the door, listing loaded and proofed — from photos to live on the market typically within days, timed to your schedule.</li>
     </ul>
-    <div class="darkpanel" style="margin-top:22px;">
+    <div class="darkpanel" style="margin-top:18px;"><div class="dpslash"></div>
       <h3>The Debut Checklist</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 30px;">
-        <p>&bull;&nbsp; Prep and staging complete before the shoot</p>
-        <p>&bull;&nbsp; Professional photos edited and selected</p>
-        <p>&bull;&nbsp; Listing description written and proofed</p>
-        <p>&bull;&nbsp; Sign and lockbox in place</p>
-        <p>&bull;&nbsp; Showing schedule and instructions set</p>
-        <p>&bull;&nbsp; Launch timed for maximum first-weekend exposure</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 28px;">
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Prep and staging complete before the shoot</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Professional photos edited and selected</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Listing description written and proofed</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Sign and lockbox in place</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Showing schedule and instructions set</p>
+        <p><span style="color:var(--accent-soft);">/</span>&nbsp; Launch timed for maximum first-weekend exposure</p>
       </div>
     </div>
-    <div class="quote" style="margin-top:22px;">
+    <div class="quote" style="margin-top:20px;">
       <div class="qtext">Buyers scroll fast. Great photography is the difference between a swipe past and a showing request.</div>
     </div>
   </div>
-  <div class="footer">
-    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">10</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
-  </div>
-</div>
-
-<!-- ============================== PAGE 11 : REACHING BUYERS ============================== -->
-<div class="page">
-  <div class="tab-row"><div class="tab">MARKETING STRATEGY</div></div>
-  <div class="content">
-    <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Reaching</div><h1>Buyers</h1></div>
-    </div>
-    <p class="body">More than half of buyers first discover the home they ultimately purchase online, and most of the rest find it through their agent. That&rsquo;s why my marketing puts your home where buyers actually are: the search portals, the MLS agents work from, and the social feeds they scroll every day.</p>
-    <div style="margin-top:28px;">
-      <div class="smallcaps" style="font-size:12px; margin-bottom:16px; text-align:center;">Where buyers first found the home they purchased</div>
-      <svg width="744" height="420" viewBox="0 0 744 420" style="max-width:100%;">
-        <g font-family="Montserrat" font-size="13" fill="#4a4844">
-          <text x="228" y="30" text-anchor="end">Internet</text>
-          <rect x="240" y="12" width="428" height="28" fill="#232220"/>
-          <text x="678" y="30" font-weight="700" fill="#101010">51%</text>
-          <text x="228" y="82" text-anchor="end">Real estate agent</text>
-          <rect x="240" y="64" width="286" height="28" fill="#3a3833"/>
-          <text x="536" y="82" font-weight="700" fill="#101010">34%</text>
-          <text x="228" y="134" text-anchor="end">Yard / open house sign</text>
-          <rect x="240" y="116" width="67" height="28" fill="#5a564f"/>
-          <text x="317" y="134" font-weight="700" fill="#101010">8%</text>
-          <text x="228" y="186" text-anchor="end">Friend, neighbor, relative</text>
-          <rect x="240" y="168" width="34" height="28" fill="#8b8378"/>
-          <text x="284" y="186" font-weight="700" fill="#101010">4%</text>
-          <text x="228" y="238" text-anchor="end">Home builder</text>
-          <rect x="240" y="220" width="17" height="28" fill="#a89f94"/>
-          <text x="267" y="238" font-weight="700" fill="#101010">2%</text>
-          <text x="228" y="290" text-anchor="end">Directly from seller</text>
-          <rect x="240" y="272" width="9" height="28" fill="#bdb5aa"/>
-          <text x="259" y="290" font-weight="700" fill="#101010">1%</text>
-          <text x="228" y="342" text-anchor="end">Print / newspaper ad</text>
-          <rect x="240" y="324" width="5" height="28" fill="#cfc9c0"/>
-          <text x="255" y="342" font-weight="700" fill="#101010">&lt;1%</text>
-          <text x="228" y="394" text-anchor="end">Other sources</text>
-          <rect x="240" y="376" width="5" height="28" fill="#cfc9c0"/>
-          <text x="255" y="394" font-weight="700" fill="#101010">&lt;1%</text>
-        </g>
-      </svg>
-      <p class="footnote" style="text-align:center; margin-top:12px;">Source: National Association of REALTORS&reg; Profile of Home Buyers and Sellers</p>
-    </div>
-  </div>
+  <div class="ghostnum" style="right:6px; bottom:26px; font-size:200px;">04</div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
     <div class="pageno">11</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 12 : WHERE WE ADVERTISE ============================== -->
-<div class="page">
-  <div class="tab-row"><div class="tab">MARKETING STRATEGY</div></div>
+<!-- ============================== PAGE 12 : REACHING BUYERS (dark peak) ============================== -->
+<div class="page dark">
+  <div class="runhead" style="border-bottom-color:#3b352c;"><div class="sec" style="color:var(--mist);"><b>04</b> MARKETING STRATEGY</div><div class="who" style="color:var(--accent-soft);">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Where Your Home</div><h1>Is Advertised</h1></div>
+      <div class="slash" style="background:var(--accent-soft);"></div>
+      <div><div class="kicker" style="color:var(--accent-soft);">reaching</div><h1>Buyers</h1></div>
     </div>
-    <p class="body">Your listing syndicates from the MLS to the portals where virtually every buyer searches — plus eXp Realty&rsquo;s national agent network and my own channels.</p>
-    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:26px;">
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">MLS</div><p style="margin-top:6px;">Central Virginia Regional MLS</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">Zillow</div><p style="margin-top:6px;">The #1 home search portal</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">Realtor.com</div><p style="margin-top:6px;">Direct MLS-fed listings</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">Redfin</div><p style="margin-top:6px;">Tech-first buyer audience</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">Homes.com</div><p style="margin-top:6px;">Fast-growing national portal</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">Trulia</div><p style="margin-top:6px;">Neighborhood-focused search</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">eXp Realty</div><p style="margin-top:6px;">National referral network</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">DanielYoonRealty.com</div><p style="margin-top:6px;">Featured listing placement</p></div>
-      <div class="card" style="text-align:center; padding:28px 12px;"><div style="font-family:'Playfair Display',serif; font-size:20px;">Social Media</div><p style="margin-top:6px;">Instagram &middot; Facebook &middot; YouTube &middot; LinkedIn &middot; TikTok</p></div>
+    <p class="body measure">More than half of buyers first discover the home they ultimately purchase online, and most of the rest find it through their agent. That&rsquo;s why my marketing puts your home where buyers actually are: the search portals, the MLS agents work from, and the social feeds they scroll every day.</p>
+    <div style="margin-top:26px;">
+      <div class="label" style="font-size:11px; margin-bottom:14px; text-align:center; color:var(--accent-soft);">Where buyers first found the home they purchased</div>
+      <svg width="744" height="420" viewBox="0 0 744 420" style="max-width:100%;">
+        <g font-family="Montserrat" font-size="13" fill="#ddd6cb">
+          <line x1="240" y1="0" x2="240" y2="410" stroke="#3b352c" stroke-width="1"/>
+          <text x="228" y="30" text-anchor="end">Internet</text>
+          <rect x="240" y="12" width="428" height="28" fill="#b39a76"/>
+          <text x="678" y="30" font-weight="700" fill="#f8f5ef">51%</text>
+          <text x="228" y="82" text-anchor="end">Real estate agent</text>
+          <rect x="240" y="64" width="286" height="28" fill="#8a7a64"/>
+          <text x="536" y="82" font-weight="700" fill="#f8f5ef">34%</text>
+          <text x="228" y="134" text-anchor="end">Yard / open house sign</text>
+          <rect x="240" y="116" width="67" height="28" fill="#6b5f4e"/>
+          <text x="317" y="134" font-weight="700" fill="#f8f5ef">8%</text>
+          <text x="228" y="186" text-anchor="end">Friend, neighbor, relative</text>
+          <rect x="240" y="168" width="34" height="28" fill="#57503f"/>
+          <text x="284" y="186" font-weight="700" fill="#f8f5ef">4%</text>
+          <text x="228" y="238" text-anchor="end">Home builder</text>
+          <rect x="240" y="220" width="17" height="28" fill="#48412f"/>
+          <text x="267" y="238" font-weight="700" fill="#f8f5ef">2%</text>
+          <text x="228" y="290" text-anchor="end">Directly from seller</text>
+          <rect x="240" y="272" width="9" height="28" fill="#3b352c"/>
+          <text x="259" y="290" font-weight="700" fill="#f8f5ef">1%</text>
+          <text x="228" y="342" text-anchor="end">Print / newspaper ad</text>
+          <rect x="240" y="324" width="5" height="28" fill="#332e26"/>
+          <text x="255" y="342" font-weight="700" fill="#f8f5ef">&lt;1%</text>
+          <text x="228" y="394" text-anchor="end">Other sources</text>
+          <rect x="240" y="376" width="5" height="28" fill="#332e26"/>
+          <text x="255" y="394" font-weight="700" fill="#f8f5ef">&lt;1%</text>
+        </g>
+      </svg>
+      <p class="footnote" style="text-align:center; margin-top:12px; color:var(--stone);">Source: National Association of REALTORS&reg; Profile of Home Buyers and Sellers</p>
     </div>
-    <div class="darkpanel" style="margin-top:26px;">
+  </div>
+  <div class="footer">
+    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
+    <div class="pageno">12</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 13 : WHERE ADVERTISED ============================== -->
+<div class="page">
+  <div class="runhead"><div class="sec"><b>04</b> MARKETING STRATEGY</div><div class="who">DANIEL YOON</div></div>
+  <div class="content">
+    <div class="lockup">
+      <div class="slash"></div>
+      <div><div class="kicker">where your home</div><h1>Is Advertised</h1></div>
+    </div>
+    <p class="body measure">Your listing syndicates from the MLS to the portals where virtually every buyer searches — plus eXp Realty&rsquo;s national agent network and my own channels.</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-top:22px;">
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">MLS</div><p style="margin-top:6px;">Central Virginia Regional MLS</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">Zillow</div><p style="margin-top:6px;">The #1 home search portal</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">Realtor.com</div><p style="margin-top:6px;">Direct MLS-fed listings</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">Redfin</div><p style="margin-top:6px;">Tech-first buyer audience</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">Homes.com</div><p style="margin-top:6px;">Fast-growing national portal</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">Trulia</div><p style="margin-top:6px;">Neighborhood-focused search</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">eXp Realty</div><p style="margin-top:6px;">National referral network</p></div>
+      <div class="card em" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">DanielYoonRealty.com</div><p style="margin-top:6px;">Featured listing placement</p></div>
+      <div class="card" style="text-align:center; padding:25px 12px;"><div style="font-family:'Playfair Display',serif; font-size:19px;">Social Media</div><p style="margin-top:6px;">Instagram &middot; Facebook &middot; YouTube &middot; LinkedIn &middot; TikTok</p></div>
+    </div>
+    <div class="darkpanel" style="margin-top:22px;"><div class="dpslash"></div>
       <h3>One Listing, Everywhere at Once</h3>
       <p>The moment your home goes live in the MLS, it syndicates across the major portals and in front of thousands of agents — then social and digital campaigns keep it in front of active Richmond-area buyers throughout the listing.</p>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">12</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">13</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 13 : OPEN HOUSES ============================== -->
+<!-- ============================== PAGE 14 : OPEN HOUSES ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">MARKETING STRATEGY</div></div>
+  <div class="runhead"><div class="sec"><b>04</b> MARKETING STRATEGY</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Open Houses</div><h1>Fact vs. Fiction</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">open houses</div><h1>Fact vs. Fiction</h1></div>
     </div>
-    <p class="body">Open houses can absolutely play a role in selling your home — but they work best as one tool among many, not as the whole strategy. Before we decide whether and when to hold one, here&rsquo;s an honest look at the common myths:</p>
-    <div style="margin-top:22px; display:flex; flex-direction:column; gap:16px;">
+    <p class="body measure">Open houses can absolutely play a role in selling your home — but they work best as one tool among many, not as the whole strategy. Before we decide whether and when to hold one, here&rsquo;s an honest look at the common myths:</p>
+    <div style="margin-top:18px; display:flex; flex-direction:column; gap:14px;">
       <div class="card">
-        <h3 style="color:#8a5a3a;">Myth: Only serious buyers walk through an open house</h3>
+        <h3 style="color:var(--accent);">Myth: Only serious buyers walk through an open house</h3>
         <p><b>Reality:</b> Many open-house visitors haven&rsquo;t spoken with a lender and don&rsquo;t yet know what they can afford. Buyers touring by private appointment with an agent are far more likely to be pre-qualified and genuinely in the market.</p>
       </div>
       <div class="card">
-        <h3 style="color:#8a5a3a;">Myth: The neighbors won&rsquo;t bother coming</h3>
+        <h3 style="color:var(--accent);">Myth: The neighbors won&rsquo;t bother coming</h3>
         <p><b>Reality:</b> They will — and that&rsquo;s not all bad. Curious neighbors compare your home to theirs, and they often know the exact friend or family member who&rsquo;s been wanting to move into the neighborhood.</p>
       </div>
       <div class="card">
-        <h3 style="color:#8a5a3a;">Myth: You must hold an open house to sell</h3>
+        <h3 style="color:var(--accent);">Myth: You must hold an open house to sell</h3>
         <p><b>Reality:</b> Homes sell every week without one. An agent who leans entirely on open houses is often substituting them for the online marketing that actually reaches today&rsquo;s buyers.</p>
       </div>
       <div class="card">
-        <h3 style="color:#8a5a3a;">Myth: Open houses never sell homes</h3>
+        <h3 style="color:var(--accent);">Myth: Open houses never sell homes</h3>
         <p><b>Reality:</b> The odds of a direct sale are modest, but open houses build traffic, buzz, and urgency — and occasionally produce the buyer. When it serves your sale, I&rsquo;ll host it and work it properly.</p>
       </div>
     </div>
-    <p class="footnote" style="margin-top:18px;">A word of strategy: too many open houses can make a listing look anxious. Spacing them out — and pairing one with any price improvement — keeps each event working in your favor.</p>
-  </div>
-  <div class="footer">
-    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">13</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
-  </div>
-</div>
-
-<!-- ============================== PAGE 14 : SHOWINGS ============================== -->
-<div class="page">
-  <div class="tab-row"><div class="tab">MARKETING STRATEGY</div></div>
-  <div class="content">
-    <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Showing</div><h1>Services</h1></div>
-    </div>
-    <ul class="bullets" style="margin-top:16px;">
-      <li><b>Easy, Controlled Scheduling</b>Showings are managed through a professional scheduling service, so every request is verified, logged, and confirmed on your terms. You&rsquo;ll set the notice window and any off-limits times that fit your household.</li>
-      <li><b>Say Yes When You Can</b>Every declined showing is a buyer who may never circle back. Give your home its best chance by accepting as many requests as reasonably possible — especially in the critical first weeks on market.</li>
-      <li><b>Showtime Standards</b>Before each showing, aim to recreate photo day: lights on, blinds open, counters clear, and everyone (pets included) out of the house so buyers can talk freely and linger.</li>
-      <li><b>Feedback, Tracked Down</b>I request feedback after every showing. Not every agent responds promptly, but I follow up persistently and share what I learn with you — including the patterns that tell us whether price, condition, or presentation needs adjusting.</li>
-    </ul>
-    <div class="darkpanel" style="margin-top:24px;">
-      <h3>Momentum Matters</h3>
-      <p>A listing draws its heaviest attention from buyers and agents when it first hits the market. Homes that show easily during that early surge — clean, available, and welcoming — capture offers that reluctant listings miss. Timing plus access equals leverage.</p>
-    </div>
-    <div class="quote" style="margin-top:24px;">
-      <div class="qtext">Every showing is an audition. We&rsquo;ll make sure your home is always ready for the part.</div>
+    <div class="darkpanel" style="margin-top:18px; padding:20px 34px;"><div class="dpslash"></div>
+      <p style="font-size:11.5px;"><b style="color:var(--paper);">A word of strategy:</b> too many open houses can make a listing look anxious. Spacing them out — and pairing one with any price improvement — keeps each event working in your favor.</p>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
     <div class="pageno">14</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 15 : RECORDING DEVICES ============================== -->
+<!-- ============================== PAGE 15 : SHOWINGS ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">MARKETING STRATEGY</div></div>
+  <div class="runhead"><div class="sec"><b>04</b> MARKETING STRATEGY</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Smart Homes &amp;</div><h1>Recording Buyers</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">showing</div><h1>Services</h1></div>
     </div>
-    <p class="body">Doorbell cameras, indoor cameras, and smart speakers are everywhere — but during showings they can create real legal risk. Before your home hits the market, let&rsquo;s make sure your technology doesn&rsquo;t become a liability.</p>
-    <ul class="bullets" style="margin-top:22px;">
+    <ul class="bullets" style="margin-top:8px;">
+      <li><b>Easy, Controlled Scheduling</b>Showings are managed through a professional scheduling service, so every request is verified, logged, and confirmed on your terms. You&rsquo;ll set the notice window and any off-limits times that fit your household.</li>
+      <li><b>Say Yes When You Can</b>Every declined showing is a buyer who may never circle back. Give your home its best chance by accepting as many requests as reasonably possible — especially in the critical first weeks on market.</li>
+      <li><b>Showtime Standards</b>Before each showing, aim to recreate photo day: lights on, blinds open, counters clear, and everyone (pets included) out of the house so buyers can talk freely and linger.</li>
+      <li><b>Feedback, Tracked Down</b>I request feedback after every showing. Not every agent responds promptly, but I follow up persistently and share what I learn with you — including the patterns that tell us whether price, condition, or presentation needs adjusting.</li>
+    </ul>
+    <div class="darkpanel" style="margin-top:20px;"><div class="dpslash"></div>
+      <h3>Momentum Matters</h3>
+      <p>A listing draws its heaviest attention from buyers and agents when it first hits the market. Homes that show easily during that early surge — clean, available, and welcoming — capture offers that reluctant listings miss. Timing plus access equals leverage.</p>
+    </div>
+    <div class="quote" style="margin-top:20px;">
+      <div class="qtext">Every showing is an audition. We&rsquo;ll make sure your home is always ready for the part.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
+    <div class="pageno">15</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 16 : RECORDING BUYERS ============================== -->
+<div class="page">
+  <div class="runhead"><div class="sec"><b>04</b> MARKETING STRATEGY</div><div class="who">DANIEL YOON</div></div>
+  <div class="content">
+    <div class="lockup">
+      <div class="slash"></div>
+      <div><div class="kicker">smart homes &amp;</div><h1>Recording Buyers</h1></div>
+    </div>
+    <p class="body measure">Doorbell cameras, indoor cameras, and smart speakers are everywhere — but during showings they can create real legal risk. Before your home hits the market, let&rsquo;s make sure your technology doesn&rsquo;t become a liability.</p>
+    <ul class="bullets" style="margin-top:18px;">
       <li><b>Audio Is the Danger Zone</b>Virginia&rsquo;s consent rules for recording conversations generally protect you only when you are a party to the conversation. Capturing audio of buyers talking privately inside your home — a conversation you&rsquo;re not part of — can expose you to serious liability under state and federal law. When in doubt, turn audio recording off during showings.</li>
       <li><b>Video Is Safer, With Limits</b>Silent video from cameras covering common areas — the exterior, entry, or garage — is generally lower risk. Cameras should never cover private spaces like bathrooms, and combining video with audio during a showing is never worth the exposure.</li>
       <li><b>Visitors Have Privacy Rights</b>An invitation into your home is not consent to be recorded however you like. Privacy law protects the people walking through your door, and courts take overreach seriously. If you have questions about your specific setup, consult an attorney before listing.</li>
       <li><b>The Better Way to Hear Buyers</b>Eavesdropping isn&rsquo;t just risky — it&rsquo;s unnecessary. Honest, structured feedback comes through your agent, and it&rsquo;s far more useful than anything overheard on a doorbell camera.</li>
     </ul>
-    <div class="darkpanel" style="margin-top:18px;">
+    <div class="darkpanel" style="margin-top:16px;"><div class="dpslash"></div>
       <h3>Before We List</h3>
       <p>Tell me about every recording device in the home. We&rsquo;ll decide together what gets disabled, what gets disclosed, and how to keep your sale — and you — protected.</p>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">15</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">16</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 16 : OFFER TO INSPECTION ============================== -->
+<!-- ============================== PAGE 17 : OFFER TO INSPECTION (05 opener) ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">YOU HAVE AN OFFER</div></div>
+  <div class="band">
+    <div class="num">05</div>
+    <div class="bslash"></div>
+    <div><div class="bsec">SECTION FIVE</div><div class="bname">Offer to Close</div></div>
+    <div class="bghost"></div><div class="bghost bghost2"></div>
+  </div>
   <div class="content">
-    <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">From Offer</div><h1>To Inspection</h1></div>
+    <div class="lockup" style="margin-top:32px;">
+      <div class="slash"></div>
+      <div><div class="kicker">from offer</div><h1>To Inspection</h1></div>
     </div>
-    <ul class="bullets" style="margin-top:16px;">
+    <ul class="bullets" style="margin-top:8px;">
       <li><b>The Offer Arrives</b>The moment an offer comes in, I&rsquo;ll send it to you and walk you through every term — not just price, but financing strength, contingencies, timelines, and closing costs. Together we&rsquo;ll decide whether to accept, counter, or negotiate further, and I&rsquo;ll handle those conversations on your behalf.</li>
       <li><b>Ratification</b>When both parties have agreed to all terms in writing, the contract is ratified and the clock starts on the buyer&rsquo;s contingency periods.</li>
       <li><b>The Inspection Period</b>Most Virginia contracts include a home inspection contingency, typically about 7&ndash;10 days. The buyer will schedule a professional inspection — plan to be away from the home for it; a thorough inspection usually runs three to four hours.</li>
       <li><b>Repair Negotiations</b>After the report comes back, the buyer may request repairs or credits. Everything is negotiable — we&rsquo;ll respond strategically, agree on terms in a written addendum, and keep the deal moving. Any agreed repairs are completed before closing, with receipts provided.</li>
     </ul>
-    <div class="darkpanel" style="margin-top:20px;">
+    <div class="darkpanel" style="margin-top:16px;"><div class="dpslash"></div>
       <h3>My Rule for This Phase</h3>
       <p>No surprises. You&rsquo;ll know where the transaction stands at every step — what&rsquo;s been requested, what I recommend, and exactly what happens next. Decisions are always yours; my job is to make sure they&rsquo;re informed ones.</p>
     </div>
-    <div class="quote" style="margin-top:22px;">
+    <div class="quote" style="margin-top:18px;">
       <div class="qtext">[Client testimonial — add a quote from a past seller here]</div>
-      <div class="qwho">— Client Name, Previous Seller</div>
+      <div class="qwho">&mdash; Client Name, Previous Seller</div>
     </div>
   </div>
+  <div class="ghostnum" style="right:6px; bottom:26px; font-size:200px;">05</div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">16</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">17</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 17 : APPRAISAL ============================== -->
+<!-- ============================== PAGE 18 : APPRAISAL ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">YOU HAVE AN OFFER</div></div>
+  <div class="runhead"><div class="sec"><b>05</b> OFFER TO CLOSE</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">The</div><h1>Appraisal</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">the</div><h1>Appraisal</h1></div>
     </div>
-    <ul class="bullets" style="margin-top:16px;">
+    <ul class="bullets" style="margin-top:8px;">
       <li><b>What Happens</b>Once inspection matters are resolved, the buyer&rsquo;s lender orders an appraisal. The appraiser visits the home — usually for well under an hour — to measure, photograph, and evaluate it against recent comparable sales. I coordinate access and timing so it&rsquo;s painless for you.</li>
       <li><b>Why It Matters</b>The appraisal protects the lender, but it effectively sets a ceiling on the financed price. If the appraised value comes in at or above the contract price, we proceed as planned. If it comes in short, the price or terms get renegotiated — and I&rsquo;ll be armed with the comparable sales data to fight for your number.</li>
       <li><b>How We Prepare</b>Before the appraiser arrives, I provide a package of the strongest recent comparables, along with a list of your home&rsquo;s upgrades and improvements. Appraisers are independent, but complete information leads to accurate values.</li>
       <li><b>The Results</b>Results typically arrive within about a week. I&rsquo;ll review them with you the day they land and explain exactly what they mean for your closing.</li>
     </ul>
-    <div class="darkpanel" style="margin-top:20px;">
+    <div class="darkpanel" style="margin-top:16px;"><div class="dpslash"></div>
       <h3>A Pricing Reality Check</h3>
       <p>The appraisal is one more reason strategic pricing wins: a contract price the market can&rsquo;t support often gets pulled back to earth at the appraisal anyway. Pricing right from the start means the appraisal confirms your value instead of threatening your deal.</p>
     </div>
-    <div class="quote" style="margin-top:22px;">
+    <div class="quote" style="margin-top:18px;">
       <div class="qtext">[Client testimonial — add a quote from a past seller here]</div>
-      <div class="qwho">— Client Name, Previous Seller</div>
-    </div>
-  </div>
-  <div class="footer">
-    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">17</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
-  </div>
-</div>
-
-<!-- ============================== PAGE 18 : CLEAR TO CLOSE ============================== -->
-<div class="page">
-  <div class="tab-row"><div class="tab">YOU HAVE AN OFFER</div></div>
-  <div class="content">
-    <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">Clear</div><h1>To Close</h1></div>
-    </div>
-    <ul class="bullets" style="margin-top:16px;">
-      <li><b>&ldquo;Clear to Close&rdquo;</b>When the buyer&rsquo;s lender issues a clear to close, every financing condition has been satisfied — the loan is fully approved. From here, the settlement agent prepares the final numbers.</li>
-      <li><b>Your Settlement Statement</b>In Virginia, closings are handled by a settlement agent — a title company or attorney. Shortly before closing you&rsquo;ll receive the settlement statement showing your payoff, prorated taxes, fees, and net proceeds. I review it with you line by line before you sign anything.</li>
-      <li><b>Logistics to Handle</b>Schedule utilities to transfer out of your name as of closing (or possession) day — power, water, gas, internet, alarm — and forward your mail with USPS. Address home insurance cancellation for after the deed records, not before.</li>
-      <li><b>Closing Day</b>Bring a valid government-issued photo ID. If you&rsquo;d like proceeds wired, the settlement agent will collect your banking details — <b style="display:inline; text-transform:none; letter-spacing:0;">always verify wiring instructions by phone with a known number; wire fraud targets real estate closings.</b> Anyone on the deed will need to sign, so plan for all owners to attend or arrange documents in advance.</li>
-    </ul>
-    <div class="darkpanel" style="margin-top:20px;">
-      <h3>I&rsquo;ll Be Right There</h3>
-      <p>From the clear-to-close through the final signature, I track every deadline, review every document, and sit beside you at the closing table. You&rsquo;ve done the hard part — the finish line is my job.</p>
+      <div class="qwho">&mdash; Client Name, Previous Seller</div>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
     <div class="pageno">18</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 19 : FINAL WALK-THROUGH ============================== -->
+<!-- ============================== PAGE 19 : CLEAR TO CLOSE ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">YOU HAVE AN OFFER</div></div>
+  <div class="runhead"><div class="sec"><b>05</b> OFFER TO CLOSE</div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">The Final</div><h1>Walk-Through</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">clear</div><h1>To Close</h1></div>
     </div>
-    <p class="body">Shortly before closing, the buyers will walk the home one last time. Their goal is simple: confirm the property is in the condition they agreed to buy, that negotiated repairs are complete, and that the move-out didn&rsquo;t leave damage behind. The golden rule: leave the home the way you&rsquo;d hope to find it if you were the one moving in.</p>
-    <div class="label-chip" style="margin:24px 0 16px;">Your walk-through checklist</div>
-    <ul class="bullets tight">
+    <ul class="bullets" style="margin-top:8px;">
+      <li><b>&ldquo;Clear to Close&rdquo;</b>When the buyer&rsquo;s lender issues a clear to close, every financing condition has been satisfied — the loan is fully approved. From here, the settlement agent prepares the final numbers.</li>
+      <li><b>Your Settlement Statement</b>In Virginia, closings are handled by a settlement agent — a title company or attorney. Shortly before closing you&rsquo;ll receive the settlement statement showing your payoff, prorated taxes, fees, and net proceeds. I review it with you line by line before you sign anything.</li>
+      <li><b>Logistics to Handle</b>Schedule utilities to transfer out of your name as of closing (or possession) day — power, water, gas, internet, alarm — and forward your mail with USPS. Address home insurance cancellation for after the deed records, not before.</li>
+      <li><b>Closing Day</b>Bring a valid government-issued photo ID. If you&rsquo;d like proceeds wired, the settlement agent will collect your banking details — <b style="display:inline; text-transform:none; letter-spacing:0;">always verify wiring instructions by phone with a known number; wire fraud targets real estate closings.</b> Anyone on the deed will need to sign, so plan for all owners to attend or arrange documents in advance.</li>
+    </ul>
+    <div class="darkpanel" style="margin-top:18px;"><div class="dpslash"></div>
+      <h3>I&rsquo;ll Be Right There</h3>
+      <p>From the clear-to-close through the final signature, I track every deadline, review every document, and sit beside you at the closing table. You&rsquo;ve done the hard part — the finish line is my job.</p>
+    </div>
+    <div class="quote" style="margin-top:18px;">
+      <div class="qtext">The best closings are the boring ones — every detail handled early, no drama at the table.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
+    <div class="pageno">19</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 20 : FINAL WALK-THROUGH ============================== -->
+<div class="page">
+  <div class="runhead"><div class="sec"><b>05</b> OFFER TO CLOSE</div><div class="who">DANIEL YOON</div></div>
+  <div class="content">
+    <div class="lockup">
+      <div class="slash"></div>
+      <div><div class="kicker">the final</div><h1>Walk-Through</h1></div>
+    </div>
+    <p class="body measure">Shortly before closing, the buyers will walk the home one last time. Their goal is simple: confirm the property is in the condition they agreed to buy, that negotiated repairs are complete, and that the move-out didn&rsquo;t leave damage behind. The golden rule: leave the home the way you&rsquo;d hope to find it if you were the one moving in.</p>
+    <div class="label-chip" style="margin:20px 0 14px;">Your walk-through checklist</div>
+    <ul class="bullets tight cols">
       <li>Patch and touch up nail holes as you take down d&eacute;cor — start early so you&rsquo;re not rushing during the move. A small artist&rsquo;s brush and matching paint make the work disappear.</li>
       <li>Remove all trash and personal items, and have the home cleaned after the movers finish.</li>
       <li>Have the lawn cut within a few days of closing so the exterior looks as good as the interior.</li>
@@ -783,66 +935,70 @@
       <li>Complete any negotiated repairs before the walk-through and keep the receipts to share.</li>
       <li>Plan to be fully moved out by the evening before closing, so the buyers can schedule their walk-through without pressure.</li>
     </ul>
-    <div class="darkpanel" style="margin-top:22px;">
+    <div class="darkpanel" style="margin-top:18px;"><div class="dpslash"></div>
       <h3>If Something Goes Wrong</h3>
       <p>If anything is damaged during the move-out, tell me immediately — a repair, a credit, or a simple conversation almost always solves it. What causes closing delays isn&rsquo;t the problem; it&rsquo;s the surprise.</p>
+    </div>
+    <div class="quote" style="margin-top:18px;">
+      <div class="qtext">Hand the next family a home you&rsquo;d be proud to receive — it&rsquo;s the last impression your house will ever make.</div>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">19</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">20</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
-<!-- ============================== PAGE 20 : FAQ ============================== -->
+<!-- ============================== PAGE 21 : FAQ ============================== -->
 <div class="page">
-  <div class="tab-row"><div class="tab">FREQUENTLY ASKED QUESTIONS</div></div>
+  <div class="runhead"><div class="sec"><b>05</b> OFFER TO CLOSE <span style="color:var(--stone); font-weight:500;">/ FAQ</span></div><div class="who">DANIEL YOON</div></div>
   <div class="content">
     <div class="lockup">
-      <img class="mark" src="assets/dy-logo.jpg" alt="">
-      <div class="stack"><div class="kicker">After the Offer</div><h1>Seller FAQ</h1></div>
+      <div class="slash"></div>
+      <div><div class="kicker">after the offer</div><h1>Seller FAQ</h1></div>
     </div>
-    <div style="display:flex; flex-direction:column; gap:15px; margin-top:12px;">
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:6px;">
       <div>
-        <div class="smallcaps" style="font-size:12px; margin-bottom:5px;">Should I be home for the buyer&rsquo;s inspection?</div>
-        <p class="body" style="font-size:12.5px;">No — this is the buyer&rsquo;s time with the home and their inspector. They&rsquo;ll speak more freely, and the process moves faster, when the owner isn&rsquo;t present.</p>
+        <div class="label" style="font-size:11px; margin-bottom:4px;"><span style="color:var(--accent);">/</span> Should I be home for the buyer&rsquo;s inspection?</div>
+        <p class="body" style="font-size:12.3px;">No — this is the buyer&rsquo;s time with the home and their inspector. They&rsquo;ll speak more freely, and the process moves faster, when the owner isn&rsquo;t present.</p>
       </div>
       <div>
-        <div class="smallcaps" style="font-size:12px; margin-bottom:5px;">Do I have to agree to the buyer&rsquo;s repair requests?</div>
-        <p class="body" style="font-size:12.5px;">No. Repair requests — and requests for credits in place of repairs — are negotiable like everything else in the contract. We&rsquo;ll respond with a strategy, not a reflex.</p>
+        <div class="label" style="font-size:11px; margin-bottom:4px;"><span style="color:var(--accent);">/</span> Do I have to agree to the buyer&rsquo;s repair requests?</div>
+        <p class="body" style="font-size:12.3px;">No. Repair requests — and requests for credits in place of repairs — are negotiable like everything else in the contract. We&rsquo;ll respond with a strategy, not a reflex.</p>
       </div>
       <div>
-        <div class="smallcaps" style="font-size:12px; margin-bottom:5px;">Can we keep showing the house after accepting an offer?</div>
-        <p class="body" style="font-size:12.5px;">You can. Some sellers continue showings for backup offers, though you can&rsquo;t accept another offer unless the current contract falls through. In practice, most listings move to pending status and showings taper off — we&rsquo;ll pick the approach that fits your situation.</p>
+        <div class="label" style="font-size:11px; margin-bottom:4px;"><span style="color:var(--accent);">/</span> Can we keep showing the house after accepting an offer?</div>
+        <p class="body" style="font-size:12.3px;">You can. Some sellers continue showings for backup offers, though you can&rsquo;t accept another offer unless the current contract falls through. In practice, most listings move to pending status and showings taper off — we&rsquo;ll pick the approach that fits your situation.</p>
       </div>
       <div>
-        <div class="smallcaps" style="font-size:12px; margin-bottom:5px;">When should we start packing?</div>
-        <p class="body" style="font-size:12.5px;">Seriously packing? Once repairs are negotiated and the appraisal has come back — that&rsquo;s when the transaction&rsquo;s biggest hurdles are behind you.</p>
+        <div class="label" style="font-size:11px; margin-bottom:4px;"><span style="color:var(--accent);">/</span> When should we start packing?</div>
+        <p class="body" style="font-size:12.3px;">Seriously packing? Once repairs are negotiated and the appraisal has come back — that&rsquo;s when the transaction&rsquo;s biggest hurdles are behind you.</p>
       </div>
       <div>
-        <div class="smallcaps" style="font-size:12px; margin-bottom:5px;">Is the closing date guaranteed?</div>
-        <p class="body" style="font-size:12.5px;">Treat it as a target, not a promise. Financed purchases commonly take 30&ndash;45+ days for full loan approval, and the precise date and time are usually confirmed only in the final days before closing. I&rsquo;ll keep you posted at every step.</p>
+        <div class="label" style="font-size:11px; margin-bottom:4px;"><span style="color:var(--accent);">/</span> Is the closing date guaranteed?</div>
+        <p class="body" style="font-size:12.3px;">Treat it as a target, not a promise. Financed purchases commonly take 30&ndash;45+ days for full loan approval, and the precise date and time are usually confirmed only in the final days before closing. I&rsquo;ll keep you posted at every step.</p>
       </div>
       <div>
-        <div class="smallcaps" style="font-size:12px; margin-bottom:5px;">What happens if the buyer&rsquo;s financing falls through?</div>
-        <p class="body" style="font-size:12.5px;">We assess quickly and relist or move to a backup offer with minimal lost time. It&rsquo;s also why we weigh financing strength — not just price — when choosing an offer in the first place.</p>
+        <div class="label" style="font-size:11px; margin-bottom:4px;"><span style="color:var(--accent);">/</span> What happens if the buyer&rsquo;s financing falls through?</div>
+        <p class="body" style="font-size:12.3px;">We assess quickly and relist or move to a backup offer with minimal lost time. It&rsquo;s also why we weigh financing strength — not just price — when choosing an offer in the first place.</p>
       </div>
     </div>
-    <div style="position:absolute; left:64px; right:64px; bottom:96px; background:var(--ink); color:var(--paper); padding:20px 30px; display:flex; align-items:center; justify-content:space-between;">
+    <div style="margin-top:22px; background:var(--ink); color:var(--paper); border-top:1px solid var(--accent); padding:20px 30px; display:flex; align-items:center; justify-content:space-between; overflow:hidden; position:relative;">
+      <div style="position:absolute; right:150px; top:-40px; width:1.5px; height:160px; background:rgba(179,154,118,.4); transform:rotate(24deg);"></div>
       <div>
-        <div style="font-family:'Playfair Display',serif; font-size:21px;">Let&rsquo;s sell your home.</div>
-        <div style="font-size:11px; letter-spacing:2px; color:var(--stone); margin-top:5px;">DANIEL YOON &middot; EXP REALTY &middot; GREATER RICHMOND, VA</div>
+        <div style="font-family:'Playfair Display',serif; font-size:22px;">Let&rsquo;s sell your home.</div>
+        <div style="font-size:10px; letter-spacing:2.4px; color:var(--accent-soft); margin-top:6px;">DANIEL YOON &nbsp;/&nbsp; EXP REALTY &nbsp;/&nbsp; GREATER RICHMOND, VA</div>
       </div>
-      <div style="text-align:right; font-size:12px; line-height:1.9;">
+      <div style="text-align:right; font-size:12px; line-height:1.9; letter-spacing:.3px;">
         804.896.2694<br>daniel.yoon@exprealty.com
       </div>
     </div>
   </div>
   <div class="footer">
     <div class="brand"><img src="assets/dy-logo.jpg" alt=""><div><div class="b1">DANIEL YOON</div><div class="b2">BROKERED BY EXP REALTY</div></div></div>
-    <div class="pageno">20</div>
-    <div class="contact">804.896.2694 <span>|</span> DANIELYOONREALTY.COM</div>
+    <div class="pageno">21</div>
+    <div class="contact">804.896.2694 <i>/</i> DANIELYOONREALTY.COM</div>
   </div>
 </div>
 
