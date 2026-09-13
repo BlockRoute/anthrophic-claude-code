@@ -150,3 +150,9 @@ _site/
 
 # hoodtrack analysis artifacts
 data/cache/
+
+# Third-party agent skills installed via `npx skills add`. The tree itself is
+# not vendored; skills-lock.json pins each skill by content hash instead.
+# Reinstall with: npx skills add GMGNAI/gmgn-skills
+.agents/
+.claude/skills/
