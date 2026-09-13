@@ -47,7 +47,8 @@ def _table(headers: Sequence[str], rows: Sequence[Sequence[str]]) -> str:
     return "\n".join([line, sep] + body)
 
 
-def render_profile(trades: Sequence[Trade], wallets: Sequence[str]) -> str:
+def render_profile(trades: Sequence[Trade], wallets: Sequence[str],
+                   unit: str = "ETH") -> str:
     buys = [t for t in trades if t.kind == BUY]
     sells = [t for t in trades if t.kind == SELL]
     exits = [t for t in trades if t.kind in EXIT_KINDS]
@@ -69,8 +70,8 @@ def render_profile(trades: Sequence[Trade], wallets: Sequence[str]) -> str:
         f"  wallets                 {len(wallets)}",
         f"  distinct tokens         {len(tokens)}",
         f"  buys / sells / exits    {len(buys)} / {len(sells)} / {len(exits)}",
-        f"  total bought            {_fmt(spent, ' ETH', 3)}",
-        f"  realised PnL            {_fmt(realized, ' ETH', 3)}",
+        f"  total bought            {_fmt(spent, f' {unit}', 3)}",
+        f"  realised PnL            {_fmt(realized, f' {unit}', 3)}",
         f"  sell win rate           {_pct(100.0 * len(winners) / len(sells)) if sells else 'n/a'}",
         f"  history span            {span}",
     ]
@@ -128,7 +129,7 @@ def render_pump(summary: Dict) -> str:
 
 
 def render_breakdown(outcomes: Sequence[ExitOutcome], label: str,
-                     horizon: str = "1h") -> str:
+                     horizon: str = "1h", unit: str = "ETH") -> str:
     if not outcomes:
         return ""
     keyfn = {"size": size_bucket, "hold": hold_bucket,
@@ -144,14 +145,14 @@ def render_breakdown(outcomes: Sequence[ExitOutcome], label: str,
             _pct(block["tiers"]["0.50"]["paper_pct"]),
             _ret(block["paper_return"]["median"]),
         ])
-    title = {"size": "by exit size (ETH)", "hold": "by holding period",
+    title = {"size": f"by exit size ({unit})", "hold": "by holding period",
              "exit": "full vs partial exit"}[label]
     return "\n".join([
         f"  {title} -- {horizon} window",
         _table(["   bucket", "n", "pumped", ">= +50%", "median peak"], rows), ""])
 
 
-def render_backtest(results: Dict[str, Dict]) -> str:
+def render_backtest(results: Dict[str, Dict], unit: str = "ETH") -> str:
     lines = ["", "COPY-TRADING BACKTEST", "=" * 68]
     rows = []
     for model in MODELS:
@@ -164,15 +165,16 @@ def render_backtest(results: Dict[str, Dict]) -> str:
             continue
         rows.append([
             model, str(m["n"]),
-            _fmt(m["net_pnl_eth"], " ETH", 3),
+            _fmt(m["net_pnl_eth"], f" {unit}", 3),
             _pct(m["return_on_deployed_pct"]),
             _pct(m["win_rate_pct"]),
             _fmt(m["profit_factor"], "", 2) if m["profit_factor"] else "inf",
-            _fmt(m["max_drawdown_eth"], " ETH", 3),
+            _fmt(m["max_drawdown_eth"], f" {unit}", 3),
             _dur(m["median_hold_seconds"]),
         ])
     lines.append(_table(
-        ["model", "n", "net PnL", "on deployed", "win%", "PF", "max DD", "med hold"],
+        ["model", "n", f"net PnL ({unit})", "on deployed", "win%", "PF",
+         f"max DD ({unit})", "med hold"],
         rows))
 
     skipped = {m: len(results[m]["skipped"]) for m in results if m in results}

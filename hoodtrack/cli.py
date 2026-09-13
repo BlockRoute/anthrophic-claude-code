@@ -17,7 +17,8 @@ from .backtest import run_backtest
 from .config import (BLOCKSCOUT_BASE, BacktestParams, Costs, HORIZONS,
                      IngestParams, PUMP_TIERS, WALLETS)
 from .http import JsonClient
-from .ingest import (Cache, fetch_entity_activity, fetch_price_series,
+from .ingest import (Cache, fetch_entity_activity, fetch_gmgn_activity,
+                     fetch_gmgn_series, fetch_price_series, kline_windows,
                      parse_activity, price_windows, traded_tokens)
 from .pump import evaluate_exits, summarize
 from .report import (render_backtest, render_breakdown, render_exit_reasons,
@@ -36,6 +37,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--wallets", nargs="*", default=WALLETS,
                    help="addresses to treat as one entity")
     p.add_argument("--wallet-file", help="file with one address per line")
+    p.add_argument("--source", choices=["blockscout", "gmgn"], default="blockscout",
+                   help="blockscout reconstructs trades from transfers (quote-asset "
+                        "denominated); gmgn uses pre-classified activity and klines "
+                        "(USD denominated)")
+    p.add_argument("--chain", default="robinhood", help="GMGN chain id")
+    p.add_argument("--resolution", default="1m",
+                   choices=["30s", "1m", "5m", "15m", "1h", "4h", "1d"],
+                   help="GMGN kline resolution; bounds how tightly short "
+                        "post-sell horizons can be measured")
+    p.add_argument("--gmgn-key", default=os.environ.get("GMGN_API_KEY"))
     p.add_argument("--base-url", default=BLOCKSCOUT_BASE)
     p.add_argument("--api-key", default=os.environ.get("BLOCKSCOUT_API_KEY"))
     p.add_argument("--cache-dir", default="data/cache")
@@ -95,23 +106,53 @@ def main(argv=None) -> int:
                           max_pages=ingest_params.max_pages_per_address)
     cache = Cache(args.cache_dir)
 
-    print(f"entity: {len(wallets)} wallets on {args.base_url}")
-    raw = fetch_entity_activity(explorer, wallets, cache, ingest_params,
-                                refresh=args.refresh)
-    transfers, native_by_tx, gas_by_tx = parse_activity(raw, wallets)
-    print(f"parsed {len(transfers)} token transfers, "
-          f"{len(native_by_tx)} native flows")
-    if not transfers:
-        print("\nNo token transfers found for these wallets on this chain.\n"
-              "Check --base-url and that the addresses are correct.", file=sys.stderr)
-        return 1
+    unit = "USD" if args.source == "gmgn" else "ETH"
+    gmgn = None
 
-    trades = build_trades(transfers, wallets, native_by_tx, gas_by_tx)
-    print(f"reconstructed {len(trades)} trades")
-    if args.command == "ingest":
-        return 0
+    if args.source == "gmgn":
+        from .sources.gmgn import GMGN_BASE, Gmgn, trades_from_activity
+        if not args.gmgn_key:
+            print("--gmgn-key (or GMGN_API_KEY) is required for --source gmgn",
+                  file=sys.stderr)
+            return 2
+        # GMGN rate-limits hard and extends the ban on every request sent
+        # during a cooldown, so stay strictly under 1 request/second.
+        gmgn_client = JsonClient(timeout=ingest_params.request_timeout,
+                                 max_retries=ingest_params.max_retries,
+                                 min_interval=1.05)
+        gmgn = Gmgn(gmgn_client, GMGN_BASE, api_key=args.gmgn_key)
 
-    tokens = traded_tokens(transfers)
+        print(f"entity: {len(wallets)} wallets on GMGN chain {args.chain}")
+        rows = fetch_gmgn_activity(gmgn, args.chain, wallets, cache,
+                                   ingest_params, refresh=args.refresh)
+        print(f"fetched {len(rows)} activity rows")
+        if not rows:
+            print("\nNo activity returned for these wallets.\n"
+                  "Check --chain and that the addresses are correct.", file=sys.stderr)
+            return 1
+        trades = trades_from_activity(rows, args.chain)
+        print(f"normalised {len(trades)} trades")
+        if args.command == "ingest":
+            return 0
+        tokens = sorted({t.token for t in trades})
+    else:
+        print(f"entity: {len(wallets)} wallets on {args.base_url}")
+        raw = fetch_entity_activity(explorer, wallets, cache, ingest_params,
+                                    refresh=args.refresh)
+        transfers, native_by_tx, gas_by_tx = parse_activity(raw, wallets)
+        print(f"parsed {len(transfers)} token transfers, "
+              f"{len(native_by_tx)} native flows")
+        if not transfers:
+            print("\nNo token transfers found for these wallets on this chain.\n"
+                  "Check --base-url and that the addresses are correct.",
+                  file=sys.stderr)
+            return 1
+
+        trades = build_trades(transfers, wallets, native_by_tx, gas_by_tx)
+        print(f"reconstructed {len(trades)} trades")
+        if args.command == "ingest":
+            return 0
+        tokens = traded_tokens(transfers)
     if args.max_tokens:
         volume = {}
         for t in trades:
@@ -120,14 +161,21 @@ def main(argv=None) -> int:
     print(f"building price history for {len(tokens)} tokens "
           "(this is the slow part; results are cached)")
 
-    windows = price_windows(trades, ingest_params.price_lookahead_seconds)
-
     def progress(i, total, token):
         print(f"  [{i}/{total}] {token}", end="\r", flush=True)
 
-    series = fetch_price_series(explorer, tokens, cache, ingest_params,
-                                window_by_token=windows, refresh=args.refresh,
-                                progress=progress)
+    if args.source == "gmgn":
+        series = fetch_gmgn_series(
+            gmgn, args.chain, tokens, cache, ingest_params,
+            resolution=args.resolution,
+            windows=kline_windows(trades, ingest_params.price_lookahead_seconds),
+            refresh=args.refresh, progress=progress)
+    else:
+        series = fetch_price_series(
+            explorer, tokens, cache, ingest_params,
+            window_by_token=price_windows(trades,
+                                          ingest_params.price_lookahead_seconds),
+            refresh=args.refresh, progress=progress)
     print(" " * 70, end="\r")
 
     outcomes = evaluate_exits(trades, series, horizons=HORIZONS,
@@ -144,13 +192,13 @@ def main(argv=None) -> int:
     results = run_backtest(trades, series, params)
 
     print()
-    print(render_profile(trades, wallets))
+    print(render_profile(trades, wallets, unit=unit))
     print(render_pump(summary))
     for label in ("exit", "size", "hold"):
-        block = render_breakdown(outcomes, label)
+        block = render_breakdown(outcomes, label, unit=unit)
         if block:
             print(block)
-    print(render_backtest(results))
+    print(render_backtest(results, unit=unit))
     print(render_exit_reasons(results))
 
     if args.json_out:

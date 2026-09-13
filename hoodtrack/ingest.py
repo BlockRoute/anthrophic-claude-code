@@ -12,7 +12,7 @@ import json
 import logging
 import os
 import time
-from typing import Callable, Dict, Iterable, List, Optional, Sequence
+from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from .config import IngestParams
 from .models import Transfer, gas_cost_eth, parse_native_from_tx, parse_transfer
@@ -195,6 +195,59 @@ def fetch_price_series(explorer: Blockscout, tokens: Sequence[str],
         log.info("  %s: %d price prints across %d pools",
                  token[:10], len(out[token]), len(pool_sets))
     return out
+
+
+def fetch_gmgn_activity(gmgn, chain: str, wallets: Sequence[str], cache: Cache,
+                        params: IngestParams, refresh: bool = False) -> List[dict]:
+    """Raw GMGN activity rows for every wallet in the entity."""
+    rows: List[dict] = []
+    for wallet in wallets:
+        wallet = wallet.lower()
+        key = f"gmgn_activity_{chain}_{wallet}"
+        items = None if refresh else cache.get(key)
+        if items is None:
+            log.info("fetching GMGN activity for %s", wallet)
+            items = list(gmgn.wallet_activity(
+                chain, wallet, limit=params.page_size,
+                max_pages=params.max_pages_per_address))
+            cache.put(key, items)
+        log.info("  %s: %d activity rows", wallet, len(items))
+        rows.extend(items)
+    return rows
+
+
+def fetch_gmgn_series(gmgn, chain: str, tokens: Sequence[str], cache: Cache,
+                      params: IngestParams, resolution: str = "1m",
+                      windows: Optional[Dict[str, Tuple[int, int]]] = None,
+                      refresh: bool = False,
+                      progress: Optional[Callable[[int, int, str], None]] = None):
+    """Build a PriceSeries per token from GMGN klines."""
+    from .sources.gmgn import series_from_kline
+
+    windows = windows or {}
+    out = {}
+    for idx, token in enumerate(tokens, 1):
+        if progress:
+            progress(idx, len(tokens), token)
+        start, end = windows.get(token, (None, None))
+        key = f"gmgn_kline_{chain}_{token}_{resolution}_{start}_{end}"
+        rows = None if refresh else cache.get(key)
+        if rows is None:
+            rows = gmgn.token_kline(chain, token, resolution=resolution,
+                                    start=start, end=end)
+            cache.put(key, rows)
+        out[token] = series_from_kline(token, rows)
+        log.info("  %s: %d candles", token[:10], len(out[token]))
+    return out
+
+
+def kline_windows(trades, lookahead: int) -> Dict[str, Tuple[int, int]]:
+    """(from, to) per token: first trade minus an hour, last exit plus lookahead."""
+    spans: Dict[str, Tuple[int, int]] = {}
+    for t in trades:
+        lo, hi = spans.get(t.token, (t.timestamp, t.timestamp))
+        spans[t.token] = (min(lo, t.timestamp), max(hi, t.timestamp))
+    return {k: (lo - 3600, hi + lookahead) for k, (lo, hi) in spans.items()}
 
 
 def price_windows(trades, lookahead: int) -> Dict[str, int]:

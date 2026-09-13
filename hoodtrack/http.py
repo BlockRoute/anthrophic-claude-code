@@ -32,12 +32,15 @@ class JsonClient:
     """Throttled JSON client. One instance per host keeps rate limits honest."""
 
     def __init__(self, timeout=30.0, max_retries=5, min_interval=0.2, api_key=None,
-                 user_agent="hoodtrack/1.0"):
+                 user_agent="hoodtrack/1.0", extra_headers=None):
         self.timeout = timeout
         self.max_retries = max_retries
         self.min_interval = min_interval
         self.api_key = api_key
         self.user_agent = user_agent
+        # Some APIs authenticate by header rather than query param (GMGN uses
+        # X-APIKEY). Kept out of the URL so keys never reach logs or caches.
+        self.extra_headers = dict(extra_headers or {})
         self._last_call = 0.0
 
     def _throttle(self):
@@ -64,6 +67,8 @@ class JsonClient:
             req = urllib.request.Request(url, data=body, method=method)
             req.add_header("Accept", "application/json")
             req.add_header("User-Agent", self.user_agent)
+            for name, value in self.extra_headers.items():
+                req.add_header(name, value)
             if body is not None:
                 req.add_header("Content-Type", "application/json")
             try:

@@ -41,6 +41,37 @@ Preview the report format without touching the network:
 python scripts/demo.py --tokens 40 --pump-prob 0.55
 ```
 
+## Data sources
+
+Two interchangeable backends. Pick with `--source`.
+
+| | `blockscout` (default) | `gmgn` |
+|---|---|---|
+| trades | reconstructed from transfers | pre-classified `buy`/`sell` rows |
+| prices | rebuilt from pool flow | OHLCV candles |
+| units | chain quote asset (ETH) | **USD** |
+| auth | none (optional key for rate limits) | `GMGN_API_KEY` |
+| finest price granularity | every swap | 30s candles |
+
+```bash
+export GMGN_API_KEY=...
+python -m hoodtrack run --source gmgn --chain robinhood --resolution 1m
+```
+
+GMGN is faster and needs no pool inference, but candles are aggregated: within
+a bar you get `high` and `close`, not the individual prints. hoodtrack uses
+`high` only for `paper` statistics and always fills at `close`, so a wick
+inflates the paper number and never the backtest. Blockscout sees every
+individual swap and is the more precise source for sub-minute horizons.
+
+**The two sources are denominated differently** — ETH vs USD. `--notional` and
+`--gas-eth` are interpreted in whichever unit the source reports, and the report
+labels itself accordingly. Do not compare runs across sources without converting.
+
+The GMGN endpoints used (`/v1/user/wallet_activity`, `/v1/market/token_kline`)
+need only the API key. The signing private key is required for swap, order and
+holdings routes, which this tool never calls.
+
 ## How it works
 
 **Trades are reconstructed from transfers, not from decoded router calls.**

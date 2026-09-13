@@ -34,6 +34,14 @@ class PricePoint:
     volume_quote: float
     tx_hash: str
     pool: str
+    # Candle sources (GMGN klines) know the intrabar extreme; swap-derived prints
+    # do not and leave this None. Only `paper` statistics may read it -- fills
+    # always execute at `price`, because you cannot reliably trade a wick.
+    high: Optional[float] = None
+
+    @property
+    def peak(self) -> float:
+        return self.high if self.high is not None else self.price
 
 
 class PriceSeries:
@@ -76,8 +84,8 @@ class PriceSeries:
         pts = self.window(t0, t1)
         if not pts:
             return None
-        best = max(pts, key=lambda p: p.price)
-        return best.price, best.timestamp
+        best = max(pts, key=lambda p: p.peak)
+        return best.peak, best.timestamp
 
     def close_at_horizon(self, t0: int, horizon: int,
                          max_staleness: int = 3600) -> Optional[float]:
