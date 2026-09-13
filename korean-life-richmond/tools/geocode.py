@@ -26,6 +26,8 @@ def lookup(addr, zipc):
     return None,None,'MISS',None
 out=[]
 for p in places:
+    if p.get('lat') and p.get('lon'):
+        p['geo']='overture-place'; print(f"{p['id']:12} (coords supplied)"); continue
     x,y,how,pc=lookup(p['address'],p['zip'])
     p['lon'],p['lat'],p['geo']=x,y,how
     print(f"{p['id']:12} {p['address']:28} {p['zip']}  -> {how:14} {pc}  {y},{x}")
