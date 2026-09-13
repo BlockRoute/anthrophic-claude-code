@@ -1,0 +1,3 @@
+# Runtime state stays local — it holds positions and a full trade log.
+*
+!.gitignore
