@@ -36,7 +36,7 @@ head=f"""<!doctype html>
 <meta property="og:title" content="Korean Life in Richmond">
 <meta property="og:description" content="Korean churches, grocery stores, academies and hospitals in and around Richmond, Virginia.">
 <meta name="theme-color" content="#0f1319">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f2b63f'/%3E%3Ctext x='16' y='21' font-size='15' font-weight='700' text-anchor='middle' font-family='sans-serif' fill='%230f1319'%3E%EB%A7%88%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23f2b63f'/%3E%3Cpath transform='translate(6 6) scale(0.83)' fill='%230f1319' d='M17.21 9l-4.38-6.56c-.19-.28-.51-.42-.83-.42-.32 0-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1h-4.79zM9 9l3-4.4L15 9H9zm3 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z'/%3E%3C/svg%3E">
 {ga_tag}<style>body{{margin:0}}img{{max-width:100%}}[hidden]{{display:none!important}}</style>
 </head>
 <body>

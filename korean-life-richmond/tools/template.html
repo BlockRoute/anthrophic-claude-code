@@ -62,7 +62,8 @@ h1{font-family:"Hahmlet",serif;font-weight:600;font-size:27px;line-height:1.15;m
 .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 22px 12px}
 .chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:transparent;cursor:pointer;text-align:left;transition:background .15s,border-color .15s,opacity .15s}
 .chip:hover{border-color:var(--line-2)}
-.chip .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:11px;color:var(--ground);flex:none;background:var(--c)}
+.chip .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:var(--ground);flex:none;background:var(--c)}
+.chip .dot svg,.item .g svg,.legend i svg{display:block}
 .chip .lab{display:flex;flex-direction:column;line-height:1.15}
 .chip .lab b{font-weight:500;font-size:13px}
 .chip .lab span{font-size:11px;color:var(--ink-3);letter-spacing:.04em}
@@ -140,7 +141,7 @@ svg.map.drag{cursor:grabbing}
 .mk circle.h{fill:var(--c);opacity:0;transition:opacity .2s}
 .mk:hover circle.h,.mk.on circle.h{opacity:.28}
 .mk.on circle.c{stroke:var(--ink)}
-.mk text.g{fill:var(--ground);font-weight:600;font-size:9.5px;text-anchor:middle;dominant-baseline:central;pointer-events:none;font-family:"IBM Plex Sans KR",sans-serif}
+.mk path.g{fill:var(--ground);pointer-events:none}
 .mk text.n{fill:var(--ink);font-size:11.5px;font-weight:500;paint-order:stroke;stroke:var(--ground);stroke-width:3.5px;stroke-linejoin:round;dominant-baseline:middle;pointer-events:none;opacity:0;transition:opacity .2s;font-family:"IBM Plex Sans KR",sans-serif}
 .z3 .mk text.n,.mk.on text.n,.mk:hover text.n,.present .z2 .mk text.n{opacity:1}
 .mk.dim{opacity:.18;pointer-events:none}
@@ -164,7 +165,7 @@ svg.map.drag{cursor:grabbing}
 .card{position:absolute;right:14px;bottom:44px;width:min(380px,calc(100% - 28px));background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px 14px;transform:translateY(8px);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 .card.show{opacity:1;transform:none;pointer-events:auto}
 .card .cat{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c);font-weight:600;margin-bottom:6px}
-.card .cat i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.card .cat svg{flex:none}
 .card h3{font-family:"Hahmlet",serif;font-size:20px;font-weight:600;margin:0;line-height:1.2;text-wrap:balance}
 .card .ko{font-family:"Hahmlet",serif;color:var(--ink-2);font-size:14px;margin:2px 0 8px}
 .card .sub{margin:0 0 8px;font-size:12px;color:var(--ink-3)}
@@ -240,11 +241,18 @@ svg.map.drag{cursor:grabbing}
 <script>
 const L = __LAYERS__;
 const PLACES = __PLACES__;
+const ICONS = {
+  church:  'M10.5 2h3v5h5v3h-5v12h-3V10h-5V7h5z',
+  grocery: 'M17.21 9l-4.38-6.56c-.19-.28-.51-.42-.83-.42-.32 0-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1h-4.79zM9 9l3-4.4L15 9H9zm3 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z',
+  academy: 'M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 11-6-11-6z',
+  hospital:'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z'
+};
+const icon = (c, px) => `<svg width="${px}" height="${px}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[c]}" fill="currentColor"/></svg>`;
 const CATS = {
-  church:  {en:'Churches',  ko:'교회', g:'교'},
-  grocery: {en:'Groceries', ko:'마트', g:'마'},
-  academy: {en:'Academies', ko:'학원', g:'학'},
-  hospital:{en:'Hospitals', ko:'병원', g:'병'}
+  church:  {en:'Churches',  ko:'교회'},
+  grocery: {en:'Groceries', ko:'마트'},
+  academy: {en:'Academies', ko:'학원'},
+  hospital:{en:'Hospitals', ko:'병원'}
 };
 const ORDER = ['grocery','church','academy','hospital'];
 const AREAS = [
@@ -314,7 +322,7 @@ PLACES.forEach(p => {
   const g = el('g', {class:'mk c-' + p.cat + (p.conf === 'low' ? ' low' : ''), tabindex:0, role:'button', 'aria-label': p.name_en});
   g.appendChild(el('circle', {class:'h', r:16}));
   g.appendChild(el('circle', {class:'c', r:8.5}));
-  g.appendChild(el('text', {class:'g'}, CATS[p.cat].g));
+  g.appendChild(el('path', {class:'g', d: ICONS[p.cat], transform:'translate(-5.5 -5.5) scale(0.46)'}));
   g.appendChild(el('text', {class:'n', x:13, y:0}, p.name_en));
   g._x = x; g._y = y; g._p = p; p._g = g;
   g.addEventListener('click', e => { e.stopPropagation(); select(p, true); });
@@ -401,12 +409,12 @@ const chips = document.getElementById('chips');
 ORDER.forEach(c => {
   const n = PLACES.filter(p => p.cat === c).length;
   const b = document.createElement('button'); b.className = 'chip c-' + c; b.dataset.cat = c; b.setAttribute('aria-pressed', 'true');
-  b.innerHTML = `<span class="dot">${CATS[c].g}</span><span class="lab"><b>${CATS[c].en}</b><span>${CATS[c].ko}</span></span><span class="n">${n}</span>`;
+  b.innerHTML = `<span class="dot">${icon(c, 13)}</span><span class="lab"><b>${CATS[c].en}</b><span>${CATS[c].ko}</span></span><span class="n">${n}</span>`;
   b.addEventListener('click', () => toggleCat(c)); chips.appendChild(b);
 });
 function toggleCat(c) { if (state.on.has(c)) state.on.delete(c); else state.on.add(c); render(); }
 const legend = document.getElementById('legend');
-ORDER.forEach(c => { const s = document.createElement('span'); s.className = 'c-' + c; s.innerHTML = `<i>${CATS[c].g}</i>${CATS[c].en}`; legend.appendChild(s); });
+ORDER.forEach(c => { const s = document.createElement('span'); s.className = 'c-' + c; s.innerHTML = `<i>${icon(c, 9)}</i>${CATS[c].en}`; legend.appendChild(s); });
 // ---------- county layers ----------
 const litCounties = new Map(); let hueSeq = 0;
 const cbar = document.getElementById('countiesbar'), cpills = document.getElementById('cpills'), ctoggle = document.getElementById('ctoggle');
@@ -437,7 +445,7 @@ function render() {
     const items = PLACES.filter(p => p.cat === c && matches(p)); if (!items.length) return;
     const gr = document.createElement('div'); gr.className = 'group c-' + c; gr.innerHTML = `<h2><i></i>${CATS[c].en} · ${CATS[c].ko}</h2>`;
     items.forEach(p => { const b = document.createElement('button'); b.className = 'item' + (state.sel === p ? ' on' : ''); b.dataset.id = p.id;
-      b.innerHTML = `<span class="g">${CATS[c].g}</span><span><div class="t">${p.name_en}</div>${p.name_ko ? `<div class="k">${p.name_ko}</div>` : ''}<div class="a">${p.address}, ${p.city}</div></span>`;
+      b.innerHTML = `<span class="g">${icon(c, 11)}</span><span><div class="t">${p.name_en}</div>${p.name_ko ? `<div class="k">${p.name_ko}</div>` : ''}<div class="a">${p.address}, ${p.city}</div></span>`;
       b.addEventListener('click', () => select(p, true, true)); gr.appendChild(b); });
     list.appendChild(gr);
   });
@@ -451,7 +459,7 @@ function select(p, fly, fromList) {
   const gm = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${p.name_en} ${addr}`);
   card.className = 'card show c-' + p.cat;
   card.innerHTML = `<button class="x" aria-label="Close">×</button>
-    <div class="cat"><i></i>${c.en} · ${c.ko}</div>
+    <div class="cat">${icon(p.cat, 12)}${c.en} · ${c.ko}</div>
     <h3>${p.name_en}</h3>${p.name_ko ? `<div class="ko">${p.name_ko}</div>` : ''}
     <p class="sub">${p.sub || ''}</p>
     <dl><dt>Address</dt><dd>${addr}</dd>${p.phone ? `<dt>Phone</dt><dd>${p.phone}</dd>` : ''}${p.hours ? `<dt>Hours</dt><dd>${p.hours}</dd>` : ''}</dl>
