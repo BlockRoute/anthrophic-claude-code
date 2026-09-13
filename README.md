@@ -65,14 +65,23 @@ gh pr create --title "Add new feature" --body "Description of changes"
 anthrophic-claude-code/
 ├── CLAUDE.md          # AI assistant development guide
 ├── README.md          # This file
-└── .git/             # Git repository
+├── hoodtrack/         # Robinhood Chain wallet analysis toolkit
+│   └── README.md      # usage, methodology and caveats
+├── scripts/           # utility scripts (demo.py exercises the pipeline)
+└── tests/             # test suites
 ```
 
-As the project grows, additional directories will be added:
-- `src/` - Source code
-- `test/` - Test suites
-- `docs/` - Additional documentation
-- `scripts/` - Build and utility scripts
+### hoodtrack
+
+Wallet forensics and copy-trade backtesting for Robinhood Chain (chain id 4663).
+Measures whether tokens keep pumping after a tracked trader sells, and backtests
+three copy-trading exit models net of gas, fees, slippage and liquidity limits.
+Standard library only. See [hoodtrack/README.md](./hoodtrack/README.md).
+
+```bash
+python -m hoodtrack run -v --json out/report.json
+python -m unittest discover -s tests
+```
 
 ## Resources
 

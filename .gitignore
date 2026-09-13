@@ -147,3 +147,6 @@ _site/
 # Backup files
 *~
 *.backup
+
+# hoodtrack analysis artifacts
+data/cache/
