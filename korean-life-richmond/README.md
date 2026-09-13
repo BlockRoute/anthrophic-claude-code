@@ -12,3 +12,7 @@ Self-contained interactive map (`index.html`, no external dependencies besides G
 Rebuild: `python3 tools/fetch.py <divisions|water|roads|places|addresses>` for each layer, then `geocode.py`, `build_layers.py`, `build_html.py` (needs `pyarrow`, `shapely`).
 
 Keyboard: `P` presentation mode, `R` reset view, `1`–`4` toggle categories, `+`/`-` zoom, `Esc` close card.
+
+## Hosting and analytics
+
+`site/index.html` is the standalone build (full HTML document) for hosting on Vercel, Netlify or GitHub Pages. Put your Google Analytics 4 measurement ID in `data/site.json` (`"ga4_measurement_id": "G-XXXXXXXXXX"`) and run `python3 tools/build_html.py` to bake the gtag snippet in. The page sends `select_place`, `area_view` and `present_mode` events, and GA4 reads the `utm_*` parameters from the link automatically.

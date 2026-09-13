@@ -233,6 +233,7 @@ const AREAS = [
   {t:'Mechanicsville', lon:-77.39, lat:37.62, span:.11},
   {t:'Tri-Cities', lon:-77.34, lat:37.26, span:.17}
 ];
+const track = (name, params) => { try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) {} };
 const svg = document.getElementById('map'), wrap = document.getElementById('mapwrap');
 const gLabels = document.getElementById('labels'), gMarkers = document.getElementById('markers');
 const NS = 'http://www.w3.org/2000/svg';
@@ -364,7 +365,7 @@ const legend = document.getElementById('legend');
 ORDER.forEach(c => { const s = document.createElement('span'); s.className = 'c-' + c; s.innerHTML = `<i>${CATS[c].g}</i>${CATS[c].en}`; legend.appendChild(s); });
 const areas = document.getElementById('areas');
 AREAS.forEach((a, i) => { const b = document.createElement('button'); b.className = 'area' + (i === 0 ? ' on' : ''); b.textContent = a.t;
-  b.addEventListener('click', () => { [...areas.children].forEach(x => x.classList.remove('on')); b.classList.add('on'); flyTo(areaBox(a)); }); areas.appendChild(b); });
+  b.addEventListener('click', () => { [...areas.children].forEach(x => x.classList.remove('on')); b.classList.add('on'); flyTo(areaBox(a)); track('area_view', {area: a.t}); }); areas.appendChild(b); });
 const list = document.getElementById('list'), q = document.getElementById('q');
 q.addEventListener('input', () => { state.q = q.value.trim().toLowerCase(); render(); });
 function matches(p) {
@@ -388,6 +389,7 @@ const card = document.getElementById('card');
 function select(p, fly, fromList) {
   state.sel = p; render();
   if (!p) { card.classList.remove('show'); return; }
+  track('select_place', {place_id: p.id, place_name: p.name_en, category: p.cat});
   const c = CATS[p.cat]; const addr = `${p.address}, ${p.city}, VA ${p.zip}`;
   const gm = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${p.name_en} ${addr}`);
   card.className = 'card show c-' + p.cat;
@@ -408,7 +410,7 @@ document.getElementById('zout').addEventListener('click', () => { const {W,H} = 
 document.getElementById('reset').addEventListener('click', () => flyTo(allBox()));
 const app = document.getElementById('app');
 document.getElementById('present').addEventListener('click', togglePresent);
-function togglePresent() { app.classList.toggle('present'); const {W,H} = size(); vb.h = vb.w * H / W; apply(); document.getElementById('present').textContent = app.classList.contains('present') ? 'Exit' : 'Present'; }
+function togglePresent() { app.classList.toggle('present'); track('present_mode', {on: app.classList.contains('present')}); const {W,H} = size(); vb.h = vb.w * H / W; apply(); document.getElementById('present').textContent = app.classList.contains('present') ? 'Exit' : 'Present'; }
 const themeBtn = document.getElementById('theme');
 function currentTheme() { const t = document.documentElement.dataset.theme; if (t) return t; return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
 function setTheme(t) { document.documentElement.dataset.theme = t; themeBtn.textContent = t === 'dark' ? 'Paper' : 'Ink'; try { localStorage.setItem('klr-theme', t); } catch (e) {} }
