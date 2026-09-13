@@ -50,11 +50,14 @@ for r in seg:
 out['roads']={k:path_of_lines(v) for k,v in groups.items()}
 print({k:len(v) for k,v in out['roads'].items()})
 # ---- labels along lines
-def anchors(lines, spacing_km, margin_km=1.5, maxn=6, mind=180):
+def anchors(lines, spacing_km, margin_km=1.5, maxn=6, mind=180, taken=None):
+    # taken: shared list of already-placed [x,y] points (any road/shield) to
+    # declutter against, so nearby different-name labels don't crowd together.
     merged=linemerge(unary_union(lines)) if lines else None
     if merged is None: return []
     parts=[merged] if merged.geom_type=='LineString' else list(merged.geoms)
     res=[]
+    if taken is None: taken=[]
     for ln in sorted(parts,key=lambda l:-l.length):
         L=ln.length*111.0*0.85  # approx km (mixed), fine for spacing
         if L<margin_km*2: continue
@@ -67,17 +70,22 @@ def anchors(lines, spacing_km, margin_km=1.5, maxn=6, mind=180):
             if ang>90: ang-=180
             if ang<-90: ang+=180
             if any(math.hypot(x-r[0],y-r[1])<mind for r in res): continue
+            if any(math.hypot(x-t[0],y-t[1])<mind for t in taken): continue
             res.append([round(x,1),round(y,1),round(ang,1)])
+    taken.extend(res)
     return res
 shields=[('US:I','95',13),('US:I','64',13),('US:I','295',13),('US:I','195',6),('US:I','85',14),('US:VA','288',12),('US:VA','150',7),('US:VA','76',7),('US:VA','895',9),('US:US','1',12),('US:US','60',12),('US:US','360',12),('US:US','250',12),('US:US','301',14),('US:US','33',14),('US:US','460',14),('US:VA','10',14),('US:VA','147',10),('US:VA','6',14)]
 out['shields']=[]
+shield_taken=[]
 for net,ref,sp in shields:
     for a in anchors(byref.get((net,ref),[]),sp,mind=260):
         out['shields'].append({'n':net.split(':')[1],'r':ref,'x':a[0],'y':a[1],'a':a[2]})
-names=['West Broad Street','Hull Street Road','Midlothian Turnpike','Patterson Avenue','Three Chopt Road','Staples Mill Road','Brook Road','Chamberlayne Road','Mechanicsville Turnpike','Nuckols Road','Robious Road','Forest Hill Avenue','Chippenham Parkway','Powhite Parkway','Broad Rock Boulevard','Iron Bridge Road','Courthouse Road','Hopkins Road','North Parham Road','East Parham Road','Monument Avenue','River Road','Genito Road','Pouncey Tract Road','Richmond Highway','Jefferson Davis Highway','Broad Street Road','West Hundred Road','Cox Road','Gaskins Road','Ridgefield Parkway','Huguenot Road','West Huguenot Road','Walmsley Boulevard','Jahnke Road','Grove Avenue','Nine Mile Road','Williamsburg Road','Atlee Road','Meadowbridge Road','Bell Creek Road','Woodman Road','Lauderdale Drive','Old Hundred Road','Charter Colony Parkway','Brandermill Parkway','Quioccasin Road','Skipwith Road','Libbie Avenue','Boulevard','Hermitage Road','Laburnum Avenue','West Laburnum Avenue','East Laburnum Avenue','Wyndham Forest Drive','Shady Grove Road','Mountain Road','Hungary Road','Church Road','Elkhardt Road','Belt Boulevard','East Belt Boulevard','Route 1','Cold Harbor Road','East City Point Road','West City Point Road','South Crater Road','Boydton Plank Road','Washington Street','East Washington Street']
+        shield_taken.append([a[0],a[1]])
+names=['West Broad Street','Hull Street Road','Midlothian Turnpike','Patterson Avenue','Three Chopt Road','Staples Mill Road','Brook Road','Chamberlayne Road','Mechanicsville Turnpike','Nuckols Road','Robious Road','Forest Hill Avenue','Chippenham Parkway','Powhite Parkway','Broad Rock Boulevard','Iron Bridge Road','Courthouse Road','Hopkins Road','North Parham Road','East Parham Road','Monument Avenue','River Road','Genito Road','Pouncey Tract Road','Richmond Highway','Jefferson Davis Highway','Broad Street Road','West Hundred Road','Cox Road','Huguenot Road','West Huguenot Road','Walmsley Boulevard','Jahnke Road','Grove Avenue','Nine Mile Road','Williamsburg Road','Atlee Road','Meadowbridge Road','Woodman Road','Brandermill Parkway','Libbie Avenue','Boulevard','Hermitage Road','Laburnum Avenue','West Laburnum Avenue','East Laburnum Avenue','Shady Grove Road','Mountain Road','Hungary Road','Belt Boulevard','East Belt Boulevard','Route 1','Cold Harbor Road','South Crater Road','Boydton Plank Road','Washington Street','East Washington Street']
 out['roadlabels']=[]
+label_taken=[[p[0],p[1]] for p in shield_taken]  # keep road names clear of highway shields too
 for nm in names:
-    for a in anchors(byname.get(nm,[]),7,2.0,4,mind=320):
+    for a in anchors(byname.get(nm,[]),9,2.2,3,mind=115,taken=label_taken):
         out['roadlabels'].append({'t':nm,'x':a[0],'y':a[1],'a':a[2]})
 print('shields',len(out['shields']),'roadlabels',len(out['roadlabels']))
 # ---- water
