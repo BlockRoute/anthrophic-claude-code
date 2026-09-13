@@ -110,21 +110,27 @@ for r in lu:
     for pg in ([g] if g.geom_type=='Polygon' else list(getattr(g,'geoms',[]))):
         if pg.geom_type=='Polygon' and pg.area*(111e3*CX)*(111e3)>=150000: parks.append(P(pg))
 out['parks']=path_of_polys(parks); print('parks',len(parks))
-# ---- counties
+# ---- counties (one shape per county so each can be toggled)
 da=pq.read_table('ovt/division_area.parquet', columns=['subtype','names','geometry']).to_pylist()
-cpolys=[]; clabels=[]
+cshapes=[]; clabels=[]
 for r in da:
     if r['subtype']!='county': continue
     g=shapely.from_wkb(r['geometry'])
     if not g.intersects(clip): continue
     nm=(r['names'] or {}).get('primary')
-    gc=g.intersection(clip).simplify(0.0002)
-    for pg in ([gc] if gc.geom_type=='Polygon' else list(getattr(gc,'geoms',[]))):
-        if pg.geom_type=='Polygon': cpolys.append(P(pg))
-    c=g.intersection(clip).representative_point(); x,y=prj(c.x,c.y)
-    if nm!='Richmond': clabels.append({'t':nm.replace(' County','').upper(),'x':round(x,1),'y':round(y,1)})
-out['counties']=path_of_polys(cpolys); out['countylabels']=clabels
-print('counties',[c['t'] for c in clabels])
+    gc=g.intersection(clip)
+    if gc.area/g.area<0.2: continue   # skip slivers at the map edge
+    gs=gc.simplify(0.0002)
+    polys=[P(pg) for pg in ([gs] if gs.geom_type=='Polygon' else list(getattr(gs,'geoms',[]))) if pg.geom_type=='Polygon']
+    c=gc.representative_point(); x,y=prj(c.x,c.y)
+    minx,miny,maxx,maxy=gc.bounds; bx1,by1=prj(minx,maxy); bx2,by2=prj(maxx,miny)
+    short=nm.replace(' County','')
+    cshapes.append({'t':short,'full':nm if 'County' in nm else nm+' (city)','d':path_of_polys(polys),'x':round(x,1),'y':round(y,1),'b':[round(bx1,1),round(by1,1),round(bx2,1),round(by2,1)]})
+    if short!='Richmond': clabels.append({'t':short.upper(),'x':round(x,1),'y':round(y,1)})
+order=['Richmond','Henrico','Chesterfield','Hanover','Goochland','Powhatan','New Kent','Charles City','Colonial Heights','Petersburg','Hopewell','Prince George']
+cshapes.sort(key=lambda c: order.index(c['t']) if c['t'] in order else 99)
+out['countyshapes']=cshapes; out['countylabels']=clabels
+print('counties',[c['t'] for c in cshapes])
 # ---- localities
 dv=pq.read_table('ovt/division.parquet', columns=['subtype','class','names','population','geometry']).to_pylist()
 keep={'Midlothian','Ashland','Manakin-Sabot','Brandermill','Chesterfield','Colonial Heights','Petersburg','Sandston','Bon Air','Innsbrook','Short Pump','Glen Allen','Mechanicsville','Chester','Hopewell','Tuckahoe','Lakeside','Highland Springs','Laurel','Wyndham','Woodlake','Meadowbrook','Manchester','Chamberlayne','Enon','Bellwood','Montrose','Dumbarton','Rockwood','Bensley','Varina','Moseley','Rockville','Elmont','Prince George','Ettrick'}
@@ -139,4 +145,4 @@ for r in dv:
 out['localities']=locs; print('localities',[l['t'] for l in locs])
 json.dump(out,open('data/layers.json','w'))
 import os; print('size',os.path.getsize('data/layers.json'))
-print({k:len(v) for k,v in out['roads'].items()}, len(out['water']), len(out['parks']), len(out['counties']))
+print({k:len(v) for k,v in out['roads'].items()}, len(out['water']), len(out['parks']))

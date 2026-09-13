@@ -6,12 +6,14 @@ base=[]
 base.append(f'<path class="parks" d="{L["parks"]}"/>')
 base.append(f'<path class="water" d="{L["water"]}"/>')
 base.append(f'<path class="rivers" d="{L["rivers"]}"/>')
-base.append(f'<path class="counties" d="{L["counties"]}"/>')
+for c in L['countyshapes']:
+    base.append(f'<path class="county" data-county="{c["t"]}" d="{c["d"]}"/>')
 for cls in ['tertiary','secondary','primary','trunk','motorway']:
     base.append(f'<path class="road r-{cls}" d="{L["roads"].get(cls,"")}"/>')
 links=''.join(L['roads'].get(k,'') for k in ['tertiary_link','secondary_link','primary_link','trunk_link','motorway_link'])
 base.append(f'<path class="road r-link" d="{links}"/>')
 Lj={k:L[k] for k in ('w','h','bbox','k','cx','shields','roadlabels','countylabels','localities')}
+Lj['counties']=[{k:c[k] for k in ('t','full','x','y','b')} for c in L['countyshapes']]
 html=open('template.html').read().replace('__BASE__',''.join(base)).replace('__LAYERS__',json.dumps(Lj,ensure_ascii=False)).replace('__PLACES__',json.dumps(P,ensure_ascii=False))
 open('out/index.html','w').write(html)
 import os; print('bytes',os.path.getsize('out/index.html'))

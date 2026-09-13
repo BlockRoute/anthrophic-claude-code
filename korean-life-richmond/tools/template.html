@@ -94,7 +94,20 @@ svg.map.drag{cursor:grabbing}
 .water{fill:var(--water)}
 .rivers{fill:none;stroke:var(--water-line);stroke-width:1.2px;vector-effect:non-scaling-stroke;stroke-linecap:round}
 .parks{fill:var(--park)}
-.counties{fill:none;stroke:var(--county);stroke-width:1px;stroke-dasharray:6 5;vector-effect:non-scaling-stroke;opacity:.8}
+.county{fill:transparent;stroke:var(--county);stroke-width:1px;stroke-dasharray:6 5;vector-effect:non-scaling-stroke;opacity:.8;transition:fill .25s,stroke .25s;pointer-events:none}
+.county.lit{fill:var(--hue);fill-opacity:.16;stroke:var(--hue);stroke-width:2px;stroke-dasharray:none;opacity:1}
+.lbl.county.lit{fill:var(--hue);stroke:var(--label-halo);font-size:15px;letter-spacing:.32em;opacity:1}
+.cty-h0{--hue:#f2b63f}.cty-h1{--hue:#57a8ea}.cty-h2{--hue:#f0665d}.cty-h3{--hue:#6fd1b0}.cty-h4{--hue:#c58af0}.cty-h5{--hue:#ee8f4a}
+:root[data-theme="light"] .cty-h0,:root[data-theme="light"] .cty-h1,:root[data-theme="light"] .cty-h2,:root[data-theme="light"] .cty-h3,:root[data-theme="light"] .cty-h4,:root[data-theme="light"] .cty-h5{filter:saturate(1.1) brightness(.75)}
+.counties-bar{position:absolute;top:52px;left:14px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 200px);align-items:center}
+.counties-bar .pills{display:none;flex-wrap:wrap;gap:6px}
+.counties-bar.open .pills{display:flex}
+.cpill{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);cursor:pointer;font-size:11.5px;line-height:1.1;display:inline-flex;align-items:center;gap:6px}
+.cpill i{width:8px;height:8px;border-radius:50%;background:var(--line-2);display:inline-block}
+.cpill:hover{color:var(--ink);border-color:var(--line-2)}
+.cpill.on{color:var(--ink);border-color:var(--hue);background:var(--panel-2)}
+.cpill.on i{background:var(--hue)}
+.cpill.clear{color:var(--ink-3)}
 .road{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .r-tertiary{stroke:var(--road-tertiary);stroke-width:.9px;opacity:0}
 .r-secondary{stroke:var(--road-secondary);stroke-width:1.1px}
@@ -110,7 +123,7 @@ svg.map.drag{cursor:grabbing}
 .lbl.loc{fill:var(--locality);font-weight:500}
 .lbl.loc.village{opacity:0;transition:opacity .2s}
 .z1 .lbl.loc.village{opacity:1}
-.lbl.county{fill:var(--county-label);font-family:"Hahmlet",serif;letter-spacing:.3em;font-weight:500;stroke:none}
+.lbl.county{fill:var(--county-label);font-family:"Hahmlet",serif;letter-spacing:.3em;font-weight:500;stroke:none;transition:fill .25s}
 .lbl.city{font-family:"Hahmlet",serif;font-weight:600;letter-spacing:.12em;fill:var(--ink)}
 .shield{pointer-events:none;transition:opacity .2s}
 .shield.US,.shield.VA.minor{opacity:0}
@@ -170,6 +183,7 @@ svg.map.drag{cursor:grabbing}
   .head{padding:14px 16px 10px} h1{font-size:22px}
   .chips,.search{padding-left:16px;padding-right:16px}
   .areas{max-width:calc(100% - 28px)}
+  .counties-bar{max-width:calc(100% - 28px);top:auto;bottom:14px}
   .legend{display:none}
   .card{bottom:14px}
   .hud{top:auto;bottom:14px}
@@ -196,6 +210,7 @@ svg.map.drag{cursor:grabbing}
       <g id="markers"></g>
     </svg>
     <div class="areas" id="areas"></div>
+    <div class="counties-bar" id="countiesbar"><button class="area" id="ctoggle" aria-expanded="false">Counties ▾</button><div class="pills" id="cpills"></div></div>
     <div class="hud">
       <div class="row">
         <button class="btn" id="present" title="Hide the side panel for screen sharing (P)">Present</button>
@@ -247,7 +262,8 @@ function addLabel(cls, x, y, text, size, angle, extra={}) {
   t._x = x; t._y = y; t._size = size; t._a = angle || 0;
   gLabels.appendChild(t); labelNodes.push(t); return t;
 }
-L.countylabels.forEach(c => addLabel('county', c.x, c.y, c.t, 13));
+const countyLabel = {};
+L.countylabels.forEach(c => { countyLabel[c.t] = addLabel('county', c.x, c.y, c.t, 13); });
 L.roadlabels.forEach(r => addLabel('road', r.x, r.y, r.t, 10.5, r.a));
 L.localities.forEach(l => {
   if (l.t === 'Richmond') addLabel('city', l.x, l.y, 'RICHMOND', 15, 0, {y:-26});
@@ -363,6 +379,19 @@ ORDER.forEach(c => {
 function toggleCat(c) { if (state.on.has(c)) state.on.delete(c); else state.on.add(c); render(); }
 const legend = document.getElementById('legend');
 ORDER.forEach(c => { const s = document.createElement('span'); s.className = 'c-' + c; s.innerHTML = `<i>${CATS[c].g}</i>${CATS[c].en}`; legend.appendChild(s); });
+// ---------- county layers ----------
+const litCounties = new Map(); let hueSeq = 0;
+const cbar = document.getElementById('countiesbar'), cpills = document.getElementById('cpills'), ctoggle = document.getElementById('ctoggle');
+ctoggle.addEventListener('click', () => { const open = cbar.classList.toggle('open'); ctoggle.setAttribute('aria-expanded', open); ctoggle.textContent = open ? 'Counties ▴' : 'Counties ▾'; });
+function setCounty(c, on, fly) {
+  const shape = document.querySelector(`.county[data-county="${c.t}"]`); const pill = cpills.querySelector(`[data-county="${c.t}"]`); const lab = countyLabel[c.t.toUpperCase()];
+  const prev = litCounties.get(c.t); if (prev != null) { for (const n of [shape, pill, lab]) n && n.classList.remove('lit', 'on', 'cty-h' + prev); litCounties.delete(c.t); }
+  if (on) { const h = hueSeq++ % 6; litCounties.set(c.t, h); for (const n of [shape, lab]) n && n.classList.add('lit', 'cty-h' + h); pill && pill.classList.add('on', 'cty-h' + h);
+    if (fly) flyTo(fitBox(c.b[0], c.b[1], c.b[2], c.b[3], 0.06)); track('county_view', {county: c.t}); }
+}
+L.counties.forEach(c => { const b = document.createElement('button'); b.className = 'cpill'; b.dataset.county = c.t; b.title = c.full; b.innerHTML = `<i></i>${c.t}`;
+  b.addEventListener('click', () => setCounty(c, !litCounties.has(c.t), true)); cpills.appendChild(b); });
+const clr = document.createElement('button'); clr.className = 'cpill clear'; clr.textContent = 'Clear'; clr.addEventListener('click', () => L.counties.forEach(c => setCounty(c, false))); cpills.appendChild(clr);
 const areas = document.getElementById('areas');
 AREAS.forEach((a, i) => { const b = document.createElement('button'); b.className = 'area' + (i === 0 ? ' on' : ''); b.textContent = a.t;
   b.addEventListener('click', () => { [...areas.children].forEach(x => x.classList.remove('on')); b.classList.add('on'); flyTo(areaBox(a)); track('area_view', {area: a.t}); }); areas.appendChild(b); });
