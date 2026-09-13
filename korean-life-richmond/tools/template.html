@@ -128,9 +128,13 @@ svg.map.drag{cursor:grabbing}
 .shield{pointer-events:none;transition:opacity .2s}
 .shield.US,.shield.VA.minor{opacity:0}
 .z1 .shield.US,.z1 .shield.VA.minor{opacity:1}
-.shield rect{fill:var(--label-halo);stroke:var(--label);stroke-width:1px}
-.shield text{fill:var(--label);font-family:"IBM Plex Mono",monospace;font-weight:500;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
-.shield.I rect{fill:var(--label);stroke:none}.shield.I text{fill:var(--label-halo)}
+.shield text{font-family:"IBM Plex Sans KR",sans-serif;font-weight:600;text-anchor:middle;dominant-baseline:central;pointer-events:none;letter-spacing:-.02em}
+.shield .halo{fill:none;stroke:var(--ground);stroke-width:2.5px;stroke-linejoin:round}
+.shield.I .body{fill:#2b57a6}.shield.I .band{fill:#c9363b}.shield.I text{fill:#fff}
+.shield.US .body{fill:#f6f3ec;stroke:#1c1c1c;stroke-width:1px;stroke-linejoin:round}.shield.US text{fill:#161616}
+.shield.VA .body{fill:#1c1c1c}.shield.VA .disc{fill:#f6f3ec}.shield.VA text{fill:#161616}
+:root[data-theme="light"] .shield.US .body{fill:#fff}
+.shield.I .band-word{fill:#fff;font-size:2.6px;font-weight:600;letter-spacing:.05em;font-family:"IBM Plex Sans KR",sans-serif;text-anchor:middle;pointer-events:none}
 .mk{cursor:pointer}
 .mk circle.c{fill:var(--c);stroke:var(--ground);stroke-width:2.2px}
 .mk circle.h{fill:var(--c);opacity:0;transition:opacity .2s}
@@ -205,6 +209,11 @@ svg.map.drag{cursor:grabbing}
   </aside>
   <div class="mapwrap" id="mapwrap">
     <svg class="map" id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of Korean community places around Richmond, Virginia">
+      <defs>
+        <path id="i-shield" d="M-12,-8.5C-12,-11-10,-11.4-8,-10.8C-4,-9.6 4,-9.6 8,-10.8C10,-11.4 12,-11 12,-8.5C12,-1 8.5,6.5 0,11.5C-8.5,6.5-12,-1-12,-8.5Z"/>
+        <clipPath id="i-clip"><use href="#i-shield"/></clipPath>
+        <path id="us-shield" d="M-11.5,-10.5L11.5,-10.5C11.5,-7.5 12.5,-4.5 12.5,-1.5C12.5,5 6,10 0,11.5C-6,10-12.5,5-12.5,-1.5C-12.5,-4.5-11.5,-7.5-11.5,-10.5Z"/>
+      </defs>
       <g id="base">__BASE__</g>
       <g id="labels"></g>
       <g id="markers"></g>
@@ -271,9 +280,28 @@ L.localities.forEach(l => {
 });
 const shieldNodes = [];
 L.shields.forEach(s => {
-  const g = el('g', {class:'shield ' + s.n + (s.n === 'VA' && !['288','150','76','895'].includes(s.r) ? ' minor' : '')}); const w = s.r.length > 2 ? 26 : 20;
-  g.appendChild(el('rect', {x:-w/2, y:-7, width:w, height:14, rx: s.n === 'I' ? 3 : 7}));
-  g.appendChild(el('text', {'font-size':9}, s.r));
+  const g = el('g', {class:'shield ' + s.n + (s.n === 'VA' && !['288','150','76','895'].includes(s.r) ? ' minor' : '')});
+  const wide = s.r.length > 2; const sx = wide ? 1.3 : 1; const fs = wide ? 8.2 : 9.5;
+  if (s.n === 'I') {
+    const inner = el('g', {transform:`scale(${sx} 1)`});
+    inner.appendChild(el('use', {href:'#i-shield', class:'halo'}));
+    inner.appendChild(el('use', {href:'#i-shield', class:'body'}));
+    inner.appendChild(el('rect', {class:'band', x:-13, y:-12, width:26, height:6.2, 'clip-path':'url(#i-clip)'}));
+    g.appendChild(inner);
+    g.appendChild(el('text', {'font-size':fs, y:2.2}, s.r));
+  } else if (s.n === 'US') {
+    const inner = el('g', {transform:`scale(${sx} 1)`});
+    inner.appendChild(el('use', {href:'#us-shield', class:'halo'}));
+    inner.appendChild(el('use', {href:'#us-shield', class:'body'}));
+    g.appendChild(inner);
+    g.appendChild(el('text', {'font-size':fs, y:-0.5}, s.r));
+  } else {
+    const w = wide ? 27 : 22;
+    g.appendChild(el('rect', {class:'halo', x:-w/2, y:-11, width:w, height:22, rx:1.5}));
+    g.appendChild(el('rect', {class:'body', x:-w/2, y:-11, width:w, height:22, rx:1.5}));
+    g.appendChild(el('ellipse', {class:'disc', cx:0, cy:0, rx:w/2-1.8, ry:9.2}));
+    g.appendChild(el('text', {'font-size':fs, y:0.3}, s.r));
+  }
   g._x = s.x; g._y = s.y; gLabels.appendChild(g); shieldNodes.push(g);
 });
 
