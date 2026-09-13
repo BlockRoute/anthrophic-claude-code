@@ -96,8 +96,16 @@ svg.map.drag{cursor:grabbing}
 .rivers{fill:none;stroke:var(--water-line);stroke-width:1.2px;vector-effect:non-scaling-stroke;stroke-linecap:round}
 .parks{fill:var(--park)}
 .county{fill:transparent;stroke:var(--county);stroke-width:1px;stroke-dasharray:6 5;vector-effect:non-scaling-stroke;opacity:.8;transition:fill .25s,stroke .25s;pointer-events:none}
+.aoi{fill:transparent;stroke:transparent;stroke-width:1.6px;vector-effect:non-scaling-stroke;pointer-events:none;transition:fill .25s,stroke .25s}
+.aoi.lit{fill:var(--ink);fill-opacity:.07;stroke:var(--ink);stroke-dasharray:7 4;stroke-linejoin:round}
+.lbl.aoi{fill:var(--ink);font-family:"Hahmlet",serif;font-weight:600;letter-spacing:.28em;stroke:var(--label-halo);stroke-width:3.5px;opacity:0;transition:opacity .25s}
+.lbl.aoi.lit{opacity:1}
 .county.lit{fill:var(--hue);fill-opacity:.16;stroke:var(--hue);stroke-width:2px;stroke-dasharray:none;opacity:1}
-.lbl.county.lit{fill:var(--hue);stroke:var(--label-halo);font-size:15px;letter-spacing:.32em;opacity:1}
+.lbl.aoi{fill:transparent;stroke:transparent;stroke-width:1.6px;vector-effect:non-scaling-stroke;pointer-events:none;transition:fill .25s,stroke .25s}
+.aoi.lit{fill:var(--ink);fill-opacity:.07;stroke:var(--ink);stroke-dasharray:7 4;stroke-linejoin:round}
+.lbl.aoi{fill:var(--ink);font-family:"Hahmlet",serif;font-weight:600;letter-spacing:.28em;stroke:var(--label-halo);stroke-width:3.5px;opacity:0;transition:opacity .25s}
+.lbl.aoi.lit{opacity:1}
+.county.lit{fill:var(--hue);stroke:var(--label-halo);font-size:15px;letter-spacing:.32em;opacity:1}
 .cty-h0{--hue:#f2b63f}.cty-h1{--hue:#57a8ea}.cty-h2{--hue:#f0665d}.cty-h3{--hue:#6fd1b0}.cty-h4{--hue:#c58af0}.cty-h5{--hue:#ee8f4a}
 :root[data-theme="light"] .cty-h0,:root[data-theme="light"] .cty-h1,:root[data-theme="light"] .cty-h2,:root[data-theme="light"] .cty-h3,:root[data-theme="light"] .cty-h4,:root[data-theme="light"] .cty-h5{filter:saturate(1.1) brightness(.75)}
 .counties-bar{position:absolute;top:52px;left:14px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 200px);align-items:center}
@@ -289,6 +297,8 @@ L.localities.forEach(l => {
   if (l.t === 'Richmond') addLabel('city', l.x, l.y, 'RICHMOND', 15, 0, {y:-26});
   else addLabel('loc ' + (l.p >= 10000 || ['Midlothian','Ashland','Manakin-Sabot','Chesterfield','Brandermill','Innsbrook','Sandston'].includes(l.t) ? 'town' : 'village'), l.x, l.y, l.t, 11);
 });
+const areaLabel = {};
+L.areas.forEach(a => { areaLabel[a.t] = addLabel('aoi', a.x, a.y, a.t.toUpperCase(), 13, 0, {y:20}); });
 const shieldNodes = [];
 L.shields.forEach(s => {
   const g = el('g', {class:'shield ' + s.n + (s.n === 'VA' && !['288','150','76','895'].includes(s.r) ? ' minor' : '')});
@@ -379,6 +389,7 @@ function flyTo(target, ms = 650) {
 }
 function areaBox(a) {
   if (a.fit === 'all') return allBox();
+  const s = L.areas.find(x => x.t === a.t); if (s) return fitBox(s.b[0], s.b[1], s.b[2], s.b[3], 0.10);
   const [x1, y1] = prj(a.lon - a.span/2, a.lat + a.span/2 * 0.8), [x2, y2] = prj(a.lon + a.span/2, a.lat - a.span/2 * 0.8);
   return fitBox(x1, y1, x2, y2, 0);
 }
@@ -433,7 +444,12 @@ L.counties.forEach(c => { const b = document.createElement('button'); b.classNam
 const clr = document.createElement('button'); clr.className = 'cpill clear'; clr.textContent = 'Clear'; clr.addEventListener('click', () => L.counties.forEach(c => setCounty(c, false))); cpills.appendChild(clr);
 const areas = document.getElementById('areas');
 AREAS.forEach((a, i) => { const b = document.createElement('button'); b.className = 'area' + (i === 0 ? ' on' : ''); b.textContent = a.t;
-  b.addEventListener('click', () => { [...areas.children].forEach(x => x.classList.remove('on')); b.classList.add('on'); flyTo(areaBox(a)); track('area_view', {area: a.t}); }); areas.appendChild(b); });
+  b.addEventListener('click', () => { [...areas.children].forEach(x => x.classList.remove('on')); b.classList.add('on'); showArea(a.t); flyTo(areaBox(a)); track('area_view', {area: a.t}); }); areas.appendChild(b); });
+function showArea(name) {
+  document.querySelectorAll('.aoi.lit, .lbl.aoi.lit').forEach(n => n.classList.remove('lit'));
+  const s = document.querySelector(`.aoi[data-area="${name}"]`); if (s) s.classList.add('lit');
+  if (areaLabel[name]) areaLabel[name].classList.add('lit');
+}
 const list = document.getElementById('list'), q = document.getElementById('q');
 q.addEventListener('input', () => { state.q = q.value.trim().toLowerCase(); render(); });
 function matches(p) {
@@ -475,7 +491,7 @@ function select(p, fly, fromList) {
 }
 document.getElementById('zin').addEventListener('click', () => { const {W,H} = size(); zoomAt(W/2, H/2, 1.6); });
 document.getElementById('zout').addEventListener('click', () => { const {W,H} = size(); zoomAt(W/2, H/2, 1/1.6); });
-document.getElementById('reset').addEventListener('click', () => flyTo(allBox()));
+document.getElementById('reset').addEventListener('click', () => { showArea(null); [...areas.children].forEach((x, i) => x.classList.toggle('on', i === 0)); flyTo(allBox()); });
 const app = document.getElementById('app');
 document.getElementById('present').addEventListener('click', togglePresent);
 function togglePresent() { app.classList.toggle('present'); track('present_mode', {on: app.classList.contains('present')}); const {W,H} = size(); vb.h = vb.w * H / W; apply(); document.getElementById('present').textContent = app.classList.contains('present') ? 'Exit' : 'Present'; }

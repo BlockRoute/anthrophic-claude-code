@@ -131,6 +131,50 @@ order=['Richmond','Henrico','Chesterfield','Hanover','Goochland','Powhatan','New
 cshapes.sort(key=lambda c: order.index(c['t']) if c['t'] in order else 99)
 out['countyshapes']=cshapes; out['countylabels']=clabels
 print('counties',[c['t'] for c in cshapes])
+# ---- area-of-interest boundaries for the area presets
+from shapely.ops import unary_union
+def rbox(w,e,s,n,r=0.006): return shapely.box(w,s,e,n).buffer(-r).buffer(r)
+county={}
+for r in da:
+    if r['subtype']=='county': county[(r['names'] or {}).get('primary').replace(' County','')]=shapely.from_wkb(r['geometry'])
+wt_all=pq.read_table('ovt/water.parquet', columns=['subtype','names','geometry']).to_pylist()
+_riv=[shapely.from_wkb(r['geometry']) for r in wt_all if r['subtype']=='river']
+_riv=[g for g in _riv if g.geom_type in ('Polygon','MultiPolygon') and g.area*111*111*0.79>0.3]
+james=unary_union(_riv)
+james=unary_union([p for p in (james.geoms if hasattr(james,'geoms') else [james]) if p.intersects(shapely.box(-77.75,37.5,-77.3,37.62)) and p.area*111*111*0.79>0.5])
+from shapely.ops import nearest_points
+def _split(g, want_south):
+    parts=g.difference(james.buffer(0.0004))
+    parts=[p for p in (parts.geoms if hasattr(parts,'geoms') else [parts]) if p.area>1e-6]
+    keep=[]
+    for p in parts:
+        rp=nearest_points(james, p.representative_point())[0]
+        south=p.representative_point().y < rp.y
+        if south==want_south: keep.append(p)
+    return unary_union(keep) if keep else g
+def south_of_james(g): return _split(g, True)
+def north_of_james(g): return _split(g, False)
+wbroad=unary_union(byname.get('West Broad Street',[]))
+wbroad=wbroad.intersection(shapely.box(-77.585,37.55,-77.495,37.66))
+areas={
+ 'West Broad': wbroad.buffer(0.011).buffer(-0.003),
+ 'Short Pump': county['Henrico'].intersection(rbox(-77.668,-77.575,37.630,37.682)),
+ 'Downtown': north_of_james(county['Richmond'].intersection(rbox(-77.453,-77.417,37.527,37.549,0.004))),
+ 'Midlothian': county['Chesterfield'].intersection(rbox(-77.725,-77.560,37.420,37.565)),
+ 'Southside': south_of_james(county['Richmond']),
+ 'Mechanicsville': county['Hanover'].intersection(rbox(-77.455,-77.300,37.565,37.668)),
+ 'Tri-Cities': unary_union([county[k] for k in ('Petersburg','Colonial Heights','Hopewell')]).buffer(0.0005).buffer(-0.0005),
+}
+out['areashapes']=[]
+print('james bounds',james.bounds)
+for name,g in areas.items():
+    g=g.simplify(0.00025)
+    if g.is_empty: print('EMPTY',name); continue
+    polys=[P(pg) for pg in ([g] if g.geom_type=='Polygon' else list(getattr(g,'geoms',[]))) if pg.geom_type=='Polygon' and pg.area*111*111*0.79>0.05]
+    minx,miny,maxx,maxy=g.bounds; bx1,by1=prj(minx,maxy); bx2,by2=prj(maxx,miny)
+    x,y=(bx1+bx2)/2,by1
+    out['areashapes'].append({'t':name,'d':path_of_polys(polys),'x':round(x,1),'y':round(y,1),'b':[round(bx1,1),round(by1,1),round(bx2,1),round(by2,1)]})
+    print('area',name,round(g.area*111*111*0.79,1),'km2',len(polys))
 # ---- localities
 dv=pq.read_table('ovt/division.parquet', columns=['subtype','class','names','population','geometry']).to_pylist()
 keep={'Midlothian','Ashland','Manakin-Sabot','Brandermill','Chesterfield','Colonial Heights','Petersburg','Sandston','Bon Air','Innsbrook','Short Pump','Glen Allen','Mechanicsville','Chester','Hopewell','Tuckahoe','Lakeside','Highland Springs','Laurel','Wyndham','Woodlake','Meadowbrook','Manchester','Chamberlayne','Enon','Bellwood','Montrose','Dumbarton','Rockwood','Bensley','Varina','Moseley','Rockville','Elmont','Prince George','Ettrick'}

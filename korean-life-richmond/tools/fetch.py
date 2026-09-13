@@ -1,7 +1,7 @@
 import time, sys, pyarrow as pa, pyarrow.fs as fs, pyarrow.dataset as ds, pyarrow.compute as pc, pyarrow.parquet as pq
 REL="2026-08-19.0"
 W,E,S,N=-77.86,-77.14,37.15,37.80
-s3=fs.S3FileSystem(anonymous=True, region="us-west-2", proxy_options={'scheme':'http','host':'127.0.0.1','port':38591})
+s3=fs.S3FileSystem(anonymous=True, region="us-west-2", proxy_options={'scheme':'http','host':'127.0.0.1','port':int(__import__('os').environ.get('HTTPS_PROXY','http://127.0.0.1:38591').rsplit(':',1)[1])})
 def fetch(theme, typ, columns, extra=None, out=None, bbox=(W,E,S,N)):
     t=time.time()
     path=f"overturemaps-us-west-2/release/{REL}/theme={theme}/type={typ}/"
