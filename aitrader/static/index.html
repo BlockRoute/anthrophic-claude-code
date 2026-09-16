@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GMGN AI Trader</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>&#x1F4C8;</text></svg>">
+<style>
+:root {
+  color-scheme: light;
+  --plane: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --surface-2: #f2f1ee;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --delta-up: #006300;
+  --delta-down: #d03b3b;
+  --accent: #2a78d6;
+  --funnel-1: #86b6ef;
+  --funnel-2: #5598e7;
+  --funnel-3: #2a78d6;
+  --funnel-4: #1c5cab;
+  --funnel-5: #104281;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --plane: #0d0d0d;
+    --surface-1: #141414;
+    --surface-2: #1f1f1e;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --delta-up: #0ca30c;
+    --delta-down: #e66767;
+    --accent: #3987e5;
+    --funnel-1: #cde2fb;
+    --funnel-2: #9ec5f4;
+    --funnel-3: #6da7ec;
+    --funnel-4: #3987e5;
+    --funnel-5: #184f95;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plane: #0d0d0d;
+  --surface-1: #141414;
+  --surface-2: #1f1f1e;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --baseline: #383835;
+  --border: rgba(255, 255, 255, 0.10);
+  --delta-up: #0ca30c;
+  --delta-down: #e66767;
+  --accent: #3987e5;
+  --funnel-1: #cde2fb;
+  --funnel-2: #9ec5f4;
+  --funnel-3: #6da7ec;
+  --funnel-4: #3987e5;
+  --funnel-5: #184f95;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--text-primary);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-block: 0;
+}
+h1, h2, h3 { margin: 0; font-weight: 600; }
+button { font: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* --- status bar --- */
+.statusbar {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  padding: 10px 16px; background: var(--surface-1);
+  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20;
+}
+.brand { display: flex; align-items: baseline; gap: 8px; margin-right: auto; min-width: 0; }
+.brand .tag { flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand h1 { font-size: 15px; letter-spacing: -0.01em; }
+.brand .tag { font-size: 11px; color: var(--text-muted); }
+.field { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+select, input[type="text"], input[type="number"], input[type="password"], textarea {
+  font: inherit; background: var(--surface-2); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px;
+}
+input[type="number"] { width: 82px; }
+.btn {
+  background: var(--surface-2); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px;
+}
+.btn:hover { border-color: var(--baseline); }
+.btn-primary { background: var(--accent); border-color: transparent; color: #fff; }
+.btn-danger { background: var(--critical); border-color: transparent; color: #fff; }
+.btn-quiet { background: transparent; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.mode-toggle { display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.mode-toggle button { background: var(--surface-2); border: 0; padding: 6px 12px; color: var(--text-secondary); }
+.mode-toggle button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.mode-toggle button.live[aria-pressed="true"] { background: var(--critical); }
+
+.lockchip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11px;
+  padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border);
+  color: var(--text-secondary); background: var(--surface-2);
+  max-width: 40ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* --- layout --- */
+.wrap { padding: 16px; max-width: 1600px; margin: 0 auto; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.tile {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.tile .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.tile .value { font-size: 26px; font-weight: 600; margin-top: 4px; letter-spacing: -0.02em; }
+.tile .sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.value.up { color: var(--delta-up); }
+.value.down { color: var(--delta-down); }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; }
+.card > header {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.card > header h2 { font-size: 13px; }
+.card > header .count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.card .body { padding: 12px 14px; }
+.card .body.flush { padding: 0; }
+
+/* --- screening table --- */
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted); font-weight: 600; padding: 8px 10px;
+  border-bottom: 1px solid var(--grid); white-space: nowrap;
+}
+td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.row { cursor: pointer; }
+tr.row:hover td { background: var(--surface-2); }
+tr.row[aria-expanded="true"] td { background: var(--surface-2); }
+.rank { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.sym { font-weight: 600; }
+.sym small { display: block; font-weight: 400; color: var(--text-muted); font-size: 11px; }
+
+.gates { display: inline-flex; gap: 3px; }
+.gate {
+  width: 18px; height: 18px; border-radius: 4px; display: grid; place-items: center;
+  font-size: 11px; line-height: 1; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-muted);
+}
+.gate[data-state="passed"] { color: var(--good); border-color: var(--good); }
+.gate[data-state="failed"] { color: var(--critical); border-color: var(--critical); }
+.gate[data-state="skipped"] { color: var(--text-muted); }
+
+.badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 3px; font-size: 10px; padding: 2px 6px;
+  border-radius: 999px; border: 1px solid var(--border); color: var(--text-secondary);
+  background: var(--surface-2); white-space: nowrap;
+}
+.badge[data-status="good"] { color: var(--good); border-color: var(--good); }
+.badge[data-status="warning"] { color: var(--text-primary); border-color: var(--warning); }
+.badge[data-status="serious"] { color: var(--text-primary); border-color: var(--serious); }
+.badge[data-status="critical"] { color: var(--critical); border-color: var(--critical); }
+
+.verdict { font-weight: 600; font-size: 12px; letter-spacing: 0.02em; }
+.verdict[data-d="BUY"] { color: var(--good); }
+.verdict[data-d="WATCH"] { color: var(--text-primary); }
+.verdict[data-d="SKIP"] { color: var(--text-muted); }
+.verdict small { display: block; font-weight: 400; color: var(--text-muted); }
+
+/* score meter: one axis, 4px rounded data-end anchored at the baseline */
+.meter { display: flex; align-items: center; gap: 8px; }
+.meter .track {
+  position: relative; flex: 1; min-width: 54px; height: 8px;
+  background: var(--grid); border-radius: 4px; overflow: hidden;
+}
+.meter .fill { position: absolute; inset: 0 auto 0 0; border-radius: 0 4px 4px 0; background: var(--accent); }
+.meter .fill[data-status="good"] { background: var(--good); }
+.meter .fill[data-status="warning"] { background: var(--warning); }
+.meter .fill[data-status="serious"] { background: var(--serious); }
+.meter .fill[data-status="critical"] { background: var(--critical); }
+.meter .read { font-variant-numeric: tabular-nums; font-size: 12px; min-width: 34px; text-align: right; }
+
+tr.detail td { background: var(--surface-2); padding: 0; }
+.detail-inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; padding: 14px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12px; }
+.kv dt { color: var(--text-muted); }
+.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+.detail-inner h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; }
+.reasoning { font-size: 12px; color: var(--text-secondary); }
+.penalties { margin: 4px 0 0; padding-left: 16px; font-size: 12px; color: var(--text-secondary); }
+.detail-actions { display: flex; gap: 8px; align-items: center; padding: 0 14px 14px; }
+
+/* --- funnel: single ordinal blue ramp, direct labels, counts double as the table view --- */
+.funnel { display: grid; gap: 6px; }
+.fstage { display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: center; font-size: 12px; }
+.fstage .name { color: var(--text-secondary); }
+.fstage .bar { height: 14px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+.fstage .bar span { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.fstage .n { font-variant-numeric: tabular-nums; color: var(--text-primary); min-width: 52px; text-align: right; }
+.fstage .n em { color: var(--text-muted); font-style: normal; font-size: 11px; }
+.funnel-note { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+/* --- positions --- */
+.pos { border-bottom: 1px solid var(--grid); padding: 12px 14px; }
+.pos:last-child { border-bottom: 0; }
+.pos.pulse { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { background: var(--surface-1); }
+  50% { background: color-mix(in srgb, var(--critical) 14%, var(--surface-1)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pos.pulse { animation: none; border-left: 3px solid var(--critical); }
+}
+.pos .top { display: flex; align-items: baseline; gap: 8px; }
+.pos .pnl { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+.pos .pnl.up { color: var(--delta-up); }
+.pos .pnl.down { color: var(--delta-down); }
+.pos .signals { margin: 6px 0 0; padding-left: 16px; font-size: 12px; color: var(--text-secondary); }
+.pos .acts { display: flex; gap: 6px; margin-top: 8px; }
+
+/* --- event log --- */
+.log { max-height: 240px; overflow-y: auto; font-size: 12px; }
+.log div { display: flex; gap: 8px; padding: 3px 0; border-bottom: 1px solid var(--grid); }
+.log div:last-child { border-bottom: 0; }
+.log time { color: var(--text-muted); font-variant-numeric: tabular-nums; flex: none; }
+.log .lv { flex: none; width: 46px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+.log .lv[data-l="warn"] { color: var(--text-primary); }
+.log .lv[data-l="error"], .log .lv[data-l="alert"] { color: var(--critical); }
+
+.empty { color: var(--text-muted); font-size: 12px; padding: 18px 0; text-align: center; }
+
+/* --- risk summary --- */
+.risk { display: grid; gap: 10px; }
+.risk .line { display: grid; gap: 4px; }
+.risk .line .hdr { display: flex; font-size: 12px; color: var(--text-secondary); }
+.risk .line .hdr b { margin-left: auto; color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: 600; }
+.killbar {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--critical); color: var(--text-primary); font-size: 12px;
+}
+
+/* --- dialogs --- */
+dialog {
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1);
+  color: var(--text-primary); padding: 0; max-width: min(520px, 92vw); width: 100%;
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+dialog header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 600; }
+dialog .body { padding: 16px; display: grid; gap: 12px; }
+dialog footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+dialog label { display: grid; gap: 4px; font-size: 12px; color: var(--text-secondary); }
+dialog input, dialog textarea, dialog select { width: 100%; }
+.hint { font-size: 11px; color: var(--text-muted); }
+.warnbox { border: 1px solid var(--warning); border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+
+@media (max-width: 1000px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+
+<div class="statusbar">
+  <div class="brand">
+    <h1>GMGN AI Trader</h1>
+    <span class="tag">the machine screens, you press</span>
+  </div>
+
+  <label class="field">Chain
+    <select id="chain"></select>
+  </label>
+
+  <label class="field">Buy
+    <input type="number" id="amount" min="0.001" step="0.005" value="0.05">
+  </label>
+
+  <div class="mode-toggle" role="group" aria-label="Trading mode">
+    <button type="button" id="modeShadow" aria-pressed="true">SHADOW</button>
+    <button type="button" id="modeLive" class="live" aria-pressed="false">LIVE</button>
+  </div>
+
+  <span class="lockchip" id="lockchip" title="">— </span>
+
+  <button type="button" class="btn btn-primary" id="run">Run round</button>
+  <button type="button" class="btn btn-quiet" id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+  <button type="button" class="btn btn-quiet" id="gear" title="Settings" aria-label="Settings">⚙</button>
+</div>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="cols">
+    <div>
+      <section class="card">
+        <header>
+          <h2>Screening results</h2>
+          <span class="count" id="screenCount">—</span>
+        </header>
+        <div class="body flush tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="num">#</th>
+                <th>Token</th>
+                <th>Gates</th>
+                <th>Safety</th>
+                <th class="num">Dev</th>
+                <th>Judge</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty" id="screenEmpty">No round yet — press <b>Run round</b>.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header><h2>Event log</h2></header>
+        <div class="body"><div class="log" id="log"></div></div>
+      </section>
+    </div>
+
+    <div>
+      <section class="card">
+        <header>
+          <h2>Position escape monitor</h2>
+          <span class="count" id="posCount">—</span>
+        </header>
+        <div class="body flush" id="positions"></div>
+        <div class="empty" id="posEmpty">No open positions.</div>
+      </section>
+
+      <section class="card">
+        <header><h2>Gate funnel</h2></header>
+        <div class="body">
+          <div class="funnel" id="funnel"></div>
+          <p class="funnel-note" id="funnelNote"></p>
+        </div>
+      </section>
+
+      <section class="card">
+        <header><h2>Risk control</h2></header>
+        <div class="body"><div class="risk" id="risk"></div></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<dialog id="confirmDlg">
+  <header id="confirmTitle">Confirm</header>
+  <div class="body"><div id="confirmBody"></div></div>
+  <footer>
+    <button type="button" class="btn" data-act="cancel">Cancel</button>
+    <button type="button" class="btn btn-danger" data-act="ok">Confirm</button>
+  </footer>
+</dialog>
+
+<dialog id="cfgDlg">
+  <header>Settings</header>
+  <div class="body">
+    <label>Adapter
+      <select id="cfgAdapter">
+        <option value="mock">MockGMGN — synthetic data, never signs</option>
+        <option value="cli">gmgn-cli — real data, can sign in LIVE</option>
+      </select>
+    </label>
+    <label>GMGN API key
+      <input type="password" id="cfgApiKey" placeholder="leave blank to keep current" autocomplete="off">
+    </label>
+    <label>Signing key
+      <input type="password" id="cfgPrivKey" placeholder="leave blank to keep current" autocomplete="off">
+      <span class="hint" id="cfgEnvPath"></span>
+    </label>
+    <label>Trending command for <b id="cfgChainName">sol</b>
+      <textarea id="cfgTrending" rows="2"></textarea>
+      <span class="hint">Must start with <code>gmgn-cli market trending</code>.</span>
+    </label>
+    <div class="warnbox" id="cfgWarn"></div>
+  </div>
+  <footer>
+    <button type="button" class="btn" id="cfgReset">Reset command</button>
+    <button type="button" class="btn" data-act="cancel">Cancel</button>
+    <button type="button" class="btn btn-primary" id="cfgSave">Save</button>
+  </footer>
+</dialog>
+
+<script>
+"use strict";
+
+const CHAIN_KEY = "gmgn.chain";          // per-tab, so two tabs can watch two chains
+const POLL_MS = 6000;
+const GATE_LABELS = {
+  prefilter: ["P", "Prefilter"],
+  rug_gate: ["R", "Rug gate"],
+  momentum: ["M", "Momentum"],
+  dev_eval: ["D", "Dev eval"],
+  top20: ["T", "Top 20"],
+  llm: ["J", "Judge"],
+};
+const GATE_GLYPH = { passed: "✓", failed: "✕", skipped: "·", pending: "·" };
+const FUNNEL_STAGES = [
+  ["trending", "Trending"],
+  ["prefilter", "Prefilter"],
+  ["rug_gate", "Rug gate"],
+  ["dev_eval", "Dev eval"],
+  ["top20", "Top 20"],
+];
+
+let state = { chain: "sol", status: null, round: null, expanded: null, busy: false };
+let timer = null;
+
+const $ = (id) => document.getElementById(id);
+const fmtNum = (v, d = 2) => (v === null || v === undefined || Number.isNaN(v) ? "—" : Number(v).toFixed(d));
+const fmtUsd = (v) => (v >= 1e6 ? "$" + (v / 1e6).toFixed(1) + "M" : v >= 1e3 ? "$" + (v / 1e3).toFixed(0) + "k" : "$" + fmtNum(v, 0));
+const fmtPct = (v) => (v === null || v === undefined ? "—" : (v >= 0 ? "+" : "") + Number(v).toFixed(2) + "%");
+const short = (a) => (a ? a.slice(0, 4) + "…" + a.slice(-4) : "—");
+
+function severityStatus(score) {
+  if (score >= 70) return "critical";
+  if (score >= 40) return "serious";
+  if (score >= 15) return "warning";
+  return "good";
+}
+function scoreStatus(score) {
+  if (score >= 62) return "good";
+  if (score >= 45) return "warning";
+  return null;
+}
+
+// --- dialogs (custom; never window.alert/confirm) ---------------------------
+
+function confirmDialog(title, html) {
+  const dlg = $("confirmDlg");
+  $("confirmTitle").textContent = title;
+  $("confirmBody").innerHTML = html;
+  dlg.showModal();
+  return new Promise((resolve) => {
+    const handler = (event) => {
+      const act = event.target.dataset.act;
+      if (!act) return;
+      dlg.close();
+      dlg.removeEventListener("click", handler);
+      resolve(act === "ok");
+    };
+    dlg.addEventListener("click", handler);
+  });
+}
+
+async function api(path, options) {
+  const response = await fetch(path, options);
+  let payload = {};
+  try { payload = await response.json(); } catch (_) { /* empty body */ }
+  if (!response.ok) throw new Error(payload.error || response.statusText);
+  return payload;
+}
+const post = (path, body) => api(path, {
+  method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}),
+});
+
+function toast(level, text) {
+  const events = (state.round && state.round.events) || [];
+  events.push({ ts: Date.now() / 1000, level, text });
+  if (state.round) renderLog(events);
+}
+
+// --- rendering ---------------------------------------------------------------
+
+function renderStatus(status) {
+  state.status = status;
+  const live = status.mode === "LIVE";
+  $("modeShadow").setAttribute("aria-pressed", String(!live));
+  $("modeLive").setAttribute("aria-pressed", String(live));
+  const chip = $("lockchip");
+  if (status.trading_locked) {
+    const brief = status.lock_reason.replace(" is True in app.py", "").replace("PUBLIC_DEMO=1: ", "");
+    chip.textContent = "● paper fills · " + brief;
+    chip.style.borderColor = "var(--warning)";
+  } else {
+    chip.textContent = "▲ LIVE — real orders will be signed";
+    chip.style.borderColor = "var(--critical)";
+  }
+  chip.title = status.lock_reason + " · adapter: " + status.adapter +
+    " · api key: " + (status.api_key_present ? "set" : "absent") +
+    " · signing key: " + (status.signing_key_present ? "set" : "absent");
+}
+
+function renderKpis(round) {
+  const candidates = round.candidates || [];
+  const positions = round.positions || [];
+  const open = positions.filter((p) => p.status === "open");
+  const risk = round.risk || {};
+  const buys = candidates.filter((c) => c.llm && c.llm.decision === "BUY").length;
+  const worst = open.reduce((max, p) => Math.max(max, (p.escape && p.escape.severity) || 0), 0);
+  const pnl = open.reduce((sum, p) => sum + (p.pnl || 0), 0);
+
+  const tiles = [
+    { label: "Survivors", value: candidates.length, sub: buys + " judged BUY" },
+    { label: "Open positions", value: open.length + " / " + (risk.max_concurrent_positions ?? "—"),
+      sub: "exposure " + fmtNum(risk.exposure, 3) + " / " + fmtNum(risk.total_exposure_cap, 2) },
+    { label: "Open PnL", value: (pnl >= 0 ? "+" : "") + fmtNum(pnl, 4),
+      sub: "realised " + fmtNum(risk.realised_pnl, 4),
+      tone: pnl > 5e-5 ? "up" : pnl < -5e-5 ? "down" : "" },
+    { label: "Worst escape", value: worst, sub: worst >= 70 ? "▲ exit now" : severityStatus(worst),
+      tone: worst >= 70 ? "down" : "" },
+    { label: "Screened", value: (round.funnel && round.funnel.trending) || 0,
+      sub: (round.rejected || []).length + " filtered out" },
+  ];
+
+  $("kpis").innerHTML = tiles.map((tile) => `
+    <div class="tile">
+      <div class="label">${tile.label}</div>
+      <div class="value ${tile.tone || ""}">${tile.value}</div>
+      <div class="sub">${tile.sub}</div>
+    </div>`).join("");
+}
+
+function safetyBadges(candidate) {
+  const security = candidate.security || {};
+  const out = [];
+  if (security.honeypot) out.push(["critical", "✕ honeypot"]);
+  if (security.freezable) out.push(["critical", "✕ freezable"]);
+  if (security.mintable) out.push([security.renounced ? "warning" : "critical", "⚠ mintable"]);
+  if (security.renounced) out.push(["good", "✓ renounced"]);
+  if (security.lp_burned) out.push(["good", "✓ lp burned"]);
+  const tax = Math.max(security.buy_tax || 0, security.sell_tax || 0);
+  if (tax > 0) out.push([tax > 0.08 ? "serious" : "warning", "● tax " + (tax * 100).toFixed(0) + "%"]);
+  if (security.top10_share !== undefined) {
+    const top10 = security.top10_share;
+    out.push([top10 > 0.6 ? "serious" : top10 > 0.4 ? "warning" : "good", "● top10 " + (top10 * 100).toFixed(0) + "%"]);
+  }
+  return out.length ? out : [["", "not scanned"]];
+}
+
+function gateCells(gates) {
+  return Object.keys(GATE_LABELS).map((key) => {
+    const stateName = (gates && gates[key]) || "pending";
+    const [glyph, label] = GATE_LABELS[key];
+    return `<span class="gate" data-state="${stateName}" title="${label}: ${stateName}"
+      aria-label="${label} ${stateName}">${GATE_GLYPH[stateName] || glyph}</span>`;
+  }).join("");
+}
+
+function renderRows(round) {
+  const candidates = round.candidates || [];
+  $("screenCount").textContent = candidates.length
+    ? candidates.length + " survivors of " + ((round.funnel && round.funnel.trending) || 0)
+    : "—";
+  $("screenEmpty").hidden = candidates.length > 0;
+
+  const body = $("rows");
+  body.innerHTML = candidates.map((candidate) => {
+    const dev = candidate.dev || {};
+    const llm = candidate.llm || {};
+    const score = candidate.priority_score || 0;
+    const expanded = state.expanded === candidate.address;
+    const devStatus = dev.score >= 0.5 ? "good" : dev.score >= 0.25 ? "warning" : "serious";
+    return `
+      <tr class="row" data-address="${candidate.address}" aria-expanded="${expanded}" tabindex="0">
+        <td class="num rank">${candidate.rank ?? "—"}</td>
+        <td class="sym">${candidate.symbol}<small>${short(candidate.address)} · ${fmtUsd(candidate.liquidity)} lp</small></td>
+        <td><span class="gates">${gateCells(candidate.gates)}</span></td>
+        <td><span class="badges">${safetyBadges(candidate).map(([s, t]) =>
+            `<span class="badge"${s ? ` data-status="${s}"` : ""}>${t}</span>`).join("")}</span></td>
+        <td class="num"><span class="badge" data-status="${devStatus}">${fmtNum(dev.score, 2)}</span></td>
+        <td><span class="verdict" data-d="${llm.decision || ""}">${llm.decision || "—"}
+            <small>conviction ${fmtNum(llm.conviction, 2)}</small></span></td>
+        <td>
+          <span class="meter">
+            <span class="track"><span class="fill"${scoreStatus(score) ? ` data-status="${scoreStatus(score)}"` : ""}
+              style="width:${Math.max(2, Math.min(100, score))}%"></span></span>
+            <span class="read">${fmtNum(score, 1)}</span>
+          </span>
+        </td>
+      </tr>
+      ${expanded ? detailRow(candidate) : ""}`;
+  }).join("");
+
+  body.querySelectorAll("tr.row").forEach((row) => {
+    const toggle = () => {
+      state.expanded = state.expanded === row.dataset.address ? null : row.dataset.address;
+      renderRows(state.round);
+    };
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      toggle();
+    });
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggle(); }
+    });
+  });
+  body.querySelectorAll("button[data-buy]").forEach((button) => {
+    button.addEventListener("click", () => buy(button.dataset.buy));
+  });
+}
+
+function detailRow(candidate) {
+  const dev = candidate.dev || {};
+  const llm = candidate.llm || {};
+  const terms = candidate.score_terms || {};
+  const security = candidate.security || {};
+  const held = (state.round.positions || []).some(
+    (p) => p.address === candidate.address && p.status === "open");
+
+  const termRows = Object.entries(terms)
+    .map(([key, value]) => `<dt>${key.replace(/_/g, " ")}</dt><dd>${fmtNum(value, 3)}</dd>`).join("");
+
+  return `
+    <tr class="detail"><td colspan="7">
+      <div class="detail-inner">
+        <div>
+          <h3>Market</h3>
+          <dl class="kv">
+            <dt>price</dt><dd>${candidate.price}</dd>
+            <dt>liquidity</dt><dd>${fmtUsd(candidate.liquidity)}</dd>
+            <dt>market cap</dt><dd>${fmtUsd(candidate.market_cap)}</dd>
+            <dt>vol 5m</dt><dd>${fmtUsd(candidate.volume_5m)}</dd>
+            <dt>mom 5m</dt><dd>${fmtPct(candidate.momentum_5m)}</dd>
+            <dt>mom 1h</dt><dd>${fmtPct(candidate.momentum_1h)}</dd>
+            <dt>buys / sells</dt><dd>${candidate.buy_count} / ${candidate.sell_count}</dd>
+            <dt>holders</dt><dd>${candidate.holders}</dd>
+            <dt>age</dt><dd>${fmtNum(candidate.age_minutes, 0)} min</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Score terms (weighted)</h3>
+          <dl class="kv">${termRows}</dl>
+          ${candidate.score_sunk ? `<p class="reasoning">⚠ 1h bleed &lt; -12%: score multiplied by 0.4</p>` : ""}
+        </div>
+        <div>
+          <h3>Developer reputation</h3>
+          <dl class="kv">
+            <dt>wallet</dt><dd>${short(dev.address)}</dd>
+            <dt>launches</dt><dd>${dev.launches ?? "—"}</dd>
+            <dt>alive / graduated</dt><dd>${dev.alive ?? "—"}</dd>
+            <dt>stuck in curve</dt><dd>${dev.stuck_backlog ?? "—"}</dd>
+            <dt>survival rate</dt><dd>${dev.survival_rate !== undefined ? (dev.survival_rate * 100).toFixed(1) + "%" : "—"}</dd>
+            <dt>rug rate</dt><dd>${dev.rug_rate !== undefined ? (dev.rug_rate * 100).toFixed(1) + "%" : "—"}</dd>
+            <dt>logo reskin</dt><dd>${dev.reskin ? "yes" : "no"}</dd>
+            <dt>recent unsafe</dt><dd>${(dev.recent_unsafe || []).length}</dd>
+            <dt>score</dt><dd>${fmtNum(dev.score, 3)}</dd>
+          </dl>
+          ${(dev.penalties || []).length
+            ? `<ul class="penalties">${dev.penalties.map((p) => `<li>${p}</li>`).join("")}</ul>` : ""}
+        </div>
+        <div>
+          <h3>Judge (explanation only)</h3>
+          <p class="reasoning"><b>${llm.decision || "—"}</b> · conviction ${fmtNum(llm.conviction, 2)}<br>${llm.reasoning || ""}</p>
+          <p class="hint">${llm.provider || ""} — the judge never gates and never sizes.</p>
+          <h3 style="margin-top:10px">Security scan</h3>
+          <dl class="kv">
+            <dt>buy / sell tax</dt><dd>${((security.buy_tax || 0) * 100).toFixed(1)}% / ${((security.sell_tax || 0) * 100).toFixed(1)}%</dd>
+            <dt>bundled</dt><dd>${((security.bundler_ratio || 0) * 100).toFixed(0)}%</dd>
+            <dt>top 10</dt><dd>${((security.top10_share || 0) * 100).toFixed(0)}%</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button type="button" class="btn btn-primary" data-buy="${candidate.address}" ${held ? "disabled" : ""}>
+          ${held ? "Position open" : "Buy " + ($("amount").value || "0") + " (size recomputed by code)"}</button>
+        <span class="hint">${state.status && state.status.trading_locked
+          ? "paper fill — " + state.status.lock_reason : "▲ LIVE: this signs a real order"}</span>
+      </div>
+    </td></tr>`;
+}
+
+function renderFunnel(funnel) {
+  const top = Math.max(1, funnel.trending || 1);
+  $("funnel").innerHTML = FUNNEL_STAGES.map(([key, label], index) => {
+    const value = funnel[key] || 0;
+    const pct = Math.max(1.5, (value / top) * 100);
+    return `
+      <div class="fstage">
+        <span class="name">${label}</span>
+        <span class="bar"><span style="width:${pct}%;background:var(--funnel-${index + 1})"></span></span>
+        <span class="n">${value} <em>${((value / top) * 100).toFixed(0)}%</em></span>
+      </div>`;
+  }).join("");
+  $("funnelNote").textContent = funnel.llm
+    ? `Judge explained ${funnel.llm} survivors — it narrows nothing.`
+    : "";
+}
+
+function renderPositions(positions) {
+  const open = positions.filter((p) => p.status === "open");
+  $("posCount").textContent = open.length ? open.length + " open" : "—";
+  $("posEmpty").hidden = open.length > 0;
+  $("positions").innerHTML = open.map((position) => {
+    const escape = position.escape || { severity: 0, signals: [] };
+    const status = severityStatus(escape.severity);
+    const pnlClass = position.pnl_pct > 0 ? "up" : position.pnl_pct < 0 ? "down" : "";
+    return `
+      <div class="pos ${escape.pulse ? "pulse" : ""}">
+        <div class="top">
+          <b>${position.symbol}</b>
+          <span class="hint">${position.chain} · ${fmtNum(position.size, 4)} ${position.simulated ? "· paper" : "· LIVE"}</span>
+          <span class="pnl ${pnlClass}">${fmtPct(position.pnl_pct)}</span>
+        </div>
+        <div class="meter" style="margin-top:8px">
+          <span class="hint" style="min-width:54px">escape</span>
+          <span class="track"><span class="fill" data-status="${status}"
+            style="width:${Math.max(2, escape.severity)}%"></span></span>
+          <span class="read">${escape.severity}</span>
+        </div>
+        ${escape.signals.length
+          ? `<ul class="signals">${escape.signals.map((s) => `<li>⚠ ${s.text}</li>`).join("")}</ul>`
+          : `<p class="signals" style="list-style:none;padding-left:0">✓ entry conditions hold</p>`}
+        ${escape.error ? `<p class="signals" style="padding-left:0">✕ ${escape.error}</p>` : ""}
+        <div class="acts">
+          <button type="button" class="btn btn-danger" data-sell="${position.key}">Sell${escape.pulse ? " now" : ""}</button>
+          <button type="button" class="btn" data-unmon="${position.key}">Stop monitoring</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  $("positions").querySelectorAll("button[data-sell]").forEach((button) =>
+    button.addEventListener("click", () => sell(button.dataset.sell)));
+  $("positions").querySelectorAll("button[data-unmon]").forEach((button) =>
+    button.addEventListener("click", () => post("/api/unmonitor", { key: button.dataset.unmon }).then(refresh)));
+}
+
+function renderRisk(risk) {
+  const lines = [
+    ["Open positions", risk.open_positions, risk.max_concurrent_positions, risk.open_positions / Math.max(1, risk.max_concurrent_positions)],
+    ["Exposure", fmtNum(risk.exposure, 3), fmtNum(risk.total_exposure_cap, 2), risk.exposure / Math.max(1e-9, risk.total_exposure_cap)],
+    ["Daily loss", fmtNum(Math.max(0, -risk.realised_pnl), 3), fmtNum(risk.daily_loss_cap, 2), Math.max(0, -risk.realised_pnl) / Math.max(1e-9, risk.daily_loss_cap)],
+    ["Consecutive losses", risk.consecutive_losses, risk.consecutive_loss_limit, risk.consecutive_losses / Math.max(1, risk.consecutive_loss_limit)],
+  ];
+  $("risk").innerHTML = lines.map(([label, value, cap, ratio]) => {
+    const pct = Math.max(1.5, Math.min(100, ratio * 100));
+    const status = ratio >= 1 ? "critical" : ratio >= 0.7 ? "serious" : ratio >= 0.4 ? "warning" : "good";
+    return `
+      <div class="line">
+        <div class="hdr"><span>${label}</span><b>${value} / ${cap}</b></div>
+        <span class="track" style="height:8px;background:var(--grid);border-radius:4px;overflow:hidden;position:relative;display:block">
+          <span class="fill" data-status="${status}" style="position:absolute;inset:0 auto 0 0;width:${pct}%;border-radius:0 4px 4px 0"></span>
+        </span>
+      </div>`;
+  }).join("") + (risk.kill_switch
+    ? `<div class="killbar">✕ <span>Kill-switch active — ${risk.kill_reason}</span>
+         <button type="button" class="btn" id="riskReset" style="margin-left:auto">Reset</button></div>`
+    : "") + `<p class="hint">Sizing is fixed-fraction, computed in code. UTC day ${risk.day || "—"}.</p>`;
+
+  const reset = $("riskReset");
+  if (reset) reset.addEventListener("click", async () => {
+    if (await confirmDialog("Reset kill-switch?",
+      "<p>This clears the consecutive-loss counter and re-arms trading. Only do this deliberately.</p>")) {
+      await post("/api/risk/reset"); refresh();
+    }
+  });
+}
+
+function renderLog(events) {
+  $("log").innerHTML = (events || []).slice().reverse().map((event) => `
+    <div>
+      <time>${new Date(event.ts * 1000).toLocaleTimeString()}</time>
+      <span class="lv" data-l="${event.level}">${event.level}</span>
+      <span>${event.text}</span>
+    </div>`).join("") || `<div class="empty">No events yet.</div>`;
+}
+
+function render(round) {
+  state.round = round;
+  renderStatus(round.status);
+  renderKpis(round);
+  renderRows(round);
+  renderFunnel(round.funnel || {});
+  renderPositions(round.positions || []);
+  renderRisk(round.risk || {});
+  renderLog(round.events || []);
+}
+
+// --- actions -----------------------------------------------------------------
+
+async function refresh() {
+  if (state.busy) return;
+  state.busy = true;
+  $("run").disabled = true;
+  try {
+    render(await post("/api/run", { chain: state.chain }));
+  } catch (error) {
+    toast("error", error.message);
+    try { renderStatus(await api("/api/status")); } catch (_) { /* backend down */ }
+  } finally {
+    state.busy = false;
+    $("run").disabled = false;
+  }
+}
+
+async function buy(address) {
+  const candidate = (state.round.candidates || []).find((c) => c.address === address);
+  const amount = parseFloat($("amount").value);
+  if (!candidate || !(amount > 0)) return;
+  const locked = state.status && state.status.trading_locked;
+  const ok = await confirmDialog(locked ? "Paper buy" : "▲ LIVE BUY — real funds", `
+    <p><b>${candidate.symbol}</b> — priority ${fmtNum(candidate.priority_score, 1)},
+       judge ${candidate.llm.decision}, dev ${fmtNum(candidate.dev.score, 2)}</p>
+    <p>Requested ${amount}. Code recomputes the final size from the risk model.</p>
+    ${locked ? `<p class="hint">${state.status.lock_reason} — no on-chain write.</p>`
+             : `<div class="warnbox">This signs a real, irreversible on-chain order.</div>`}`);
+  if (!ok) return;
+  try {
+    const result = await post("/api/buy", { chain: state.chain, address, amount, confirm: true });
+    toast("info", `${candidate.symbol}: filled ${result.sizing.size} (bound by ${result.sizing.binding_constraint})`);
+    await refresh();
+  } catch (error) {
+    toast("warn", "buy blocked: " + error.message);
+    renderLog(state.round.events);
+  }
+}
+
+async function sell(key) {
+  const position = (state.round.positions || []).find((p) => p.key === key);
+  if (!position) return;
+  const live = !position.simulated;
+  const ok = await confirmDialog(live ? "▲ LIVE SELL" : "Paper sell", `
+    <p><b>${position.symbol}</b> at ${fmtPct(position.pnl_pct)}
+       (escape ${position.escape.severity})</p>
+    ${live ? `<div class="warnbox">This signs a real, irreversible on-chain order.</div>` : ""}`);
+  if (!ok) return;
+  try {
+    await post("/api/sell", { key, percent: 100 });
+    await refresh();
+  } catch (error) { toast("error", "sell failed: " + error.message); }
+}
+
+async function setMode(mode) {
+  if (mode === "LIVE") {
+    const status = state.status || {};
+    const ok = await confirmDialog("Switch to LIVE?", `
+      <div class="warnbox">LIVE mode permits real, irreversible on-chain orders once
+      <code>LIVE_TRADING_DISABLED</code> is False in <code>app.py</code>.</div>
+      <p class="hint">Currently: ${status.live_trading_disabled
+        ? "LIVE_TRADING_DISABLED is <b>True</b>, so orders stay simulated."
+        : "LIVE_TRADING_DISABLED is <b>False</b> — orders will be real."}
+        Adapter: ${status.adapter}. Signing key: ${status.signing_key_present ? "set" : "absent"}.</p>`);
+    if (!ok) return;
+  }
+  try {
+    renderStatus(await post("/api/mode", { mode, confirm: true }));
+  } catch (error) { toast("error", error.message); }
+}
+
+// --- settings dialog ---------------------------------------------------------
+
+async function openConfig() {
+  const status = state.status || await api("/api/status");
+  const settings = await api("/api/settings?chain=" + state.chain);
+  $("cfgAdapter").value = status.adapter_choice;
+  $("cfgApiKey").value = "";
+  $("cfgPrivKey").value = "";
+  $("cfgEnvPath").textContent = "Stored chmod 600 at " + status.env_path + ", outside the project.";
+  $("cfgChainName").textContent = state.chain;
+  $("cfgTrending").value = settings.command;
+  $("cfgWarn").innerHTML = status.live_trading_disabled
+    ? "<b>LIVE_TRADING_DISABLED = True</b> in app.py. Every order is a paper fill regardless of these settings."
+    : "<b>LIVE_TRADING_DISABLED = False</b>. In LIVE mode with the gmgn-cli adapter, orders are real.";
+  $("cfgDlg").showModal();
+}
+
+async function saveConfig() {
+  const body = { adapter: $("cfgAdapter").value };
+  if ($("cfgApiKey").value) body.api_key = $("cfgApiKey").value;
+  if ($("cfgPrivKey").value) body.private_key = $("cfgPrivKey").value;
+  try {
+    renderStatus(await post("/api/config", body));
+    await post("/api/settings", { chain: state.chain, command: $("cfgTrending").value.trim() });
+    $("cfgDlg").close();
+    await refresh();
+  } catch (error) {
+    $("cfgWarn").innerHTML = "✕ " + error.message;
+  }
+}
+
+// --- polling: paused while the tab is hidden, to conserve quota --------------
+
+function startPolling() {
+  stopPolling();
+  timer = setInterval(() => { if (!document.hidden) refresh(); }, POLL_MS);
+}
+function stopPolling() { if (timer) clearInterval(timer); timer = null; }
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopPolling();
+  else { refresh(); startPolling(); }
+});
+
+// --- boot --------------------------------------------------------------------
+
+(async function boot() {
+  const status = await api("/api/status");
+  const select = $("chain");
+  select.innerHTML = status.chains.map((chain) => `<option value="${chain}">${chain.toUpperCase()}</option>`).join("");
+  state.chain = sessionStorage.getItem(CHAIN_KEY) || status.chains[0];
+  select.value = state.chain;
+  renderStatus(status);
+
+  select.addEventListener("change", () => {
+    state.chain = select.value;
+    sessionStorage.setItem(CHAIN_KEY, state.chain);   // per-tab, not shared
+    state.expanded = null;
+    refresh();
+  });
+  $("run").addEventListener("click", refresh);
+  $("gear").addEventListener("click", openConfig);
+  $("cfgSave").addEventListener("click", saveConfig);
+  $("cfgReset").addEventListener("click", async () => {
+    const settings = await post("/api/settings", { chain: state.chain, reset: true });
+    $("cfgTrending").value = settings.command;
+  });
+  $("modeShadow").addEventListener("click", () => setMode("SHADOW"));
+  $("modeLive").addEventListener("click", () => setMode("LIVE"));
+  document.querySelectorAll('dialog [data-act="cancel"]').forEach((button) =>
+    button.addEventListener("click", () => button.closest("dialog").close()));
+  $("theme").addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme === "dark";
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+  });
+
+  await refresh();
+  startPolling();
+})();
+</script>
+</body>
+</html>
