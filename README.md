@@ -24,6 +24,37 @@ This is currently a template repository. As you develop your project:
 3. Follow the conventions outlined in CLAUDE.md
 4. Use the git workflow described for consistent development
 
+## MCP Setup
+
+This project uses Model Context Protocol (MCP) to integrate with external tools and services.
+
+### Initial Setup
+
+1. **Copy the MCP template:**
+   ```bash
+   cp .mcp.json.template .mcp.json
+   ```
+
+2. **Add your access token:**
+   Edit `.mcp.json` and replace `<YOUR_ACCESS_TOKEN_HERE>` with your actual n8n access token.
+
+3. **Enable in Claude Code settings** (`~/.claude/settings.json`):
+   ```json
+   {
+     "enableAllProjectMcpServers": true
+   }
+   ```
+
+4. **Restart Claude Code** to load the MCP server.
+
+### Security Note
+
+⚠️ **IMPORTANT:** `.mcp.json` contains sensitive access tokens and is excluded from git via `.gitignore`. Never commit this file to the repository. Use `.mcp.json.template` for sharing the configuration structure with your team.
+
+### Available MCP Servers
+
+- **n8n-mcp**: Workflow automation server for creating and managing n8n workflows
+
 ## Key Features
 
 - **AI-First Development**: Optimized for Claude Code and AI-assisted development
@@ -63,9 +94,12 @@ gh pr create --title "Add new feature" --body "Description of changes"
 
 ```
 anthrophic-claude-code/
-├── CLAUDE.md          # AI assistant development guide
-├── README.md          # This file
-└── .git/             # Git repository
+├── CLAUDE.md              # AI assistant development guide
+├── README.md              # This file
+├── .mcp.json              # MCP server config (local, not in git)
+├── .mcp.json.template     # MCP config template (committed)
+├── .gitignore             # Git ignore patterns
+└── .git/                  # Git repository
 ```
 
 As the project grows, additional directories will be added:
