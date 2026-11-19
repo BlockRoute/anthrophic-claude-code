@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Virginia Off-Market Deals</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: contact masthead, summary ledger table, then one deal sheet per property (gallery left, facts right) */
+:root{
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#17201d; --muted:#5b6762; --line:#d9e0dd;
+  --accent:#1d5f4b; --accent-soft:#e1efe9; --gold:#9a6a12; --gold-soft:#f6ecd8;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#19211e; --ink:#e7eeeb; --muted:#9aa8a2; --line:#2b3632;
+  --accent:#5fc3a0; --accent-soft:#1d332b; --gold:#e1b45c; --gold-soft:#33291a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#19211e; --ink:#e7eeeb; --muted:#9aa8a2; --line:#2b3632;
+  --accent:#5fc3a0; --accent-soft:#1d332b; --gold:#e1b45c; --gold-soft:#33291a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.05}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+
+/* masthead */
+header.mast{border-bottom:1px solid var(--line);background:var(--surface)}
+header.mast .wrap{display:flex;flex-wrap:wrap;gap:20px 40px;align-items:flex-end;justify-content:space-between;padding-block:36px 28px}
+.mast h1{font-size:clamp(40px,6vw,64px)}
+.mast p{margin:10px 0 0;color:var(--muted);max-width:60ch}
+.contact{display:flex;flex-direction:column;gap:6px;min-width:0}
+.contact .who{font-family:var(--display);font-size:26px;font-weight:600}
+.phone-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.phone{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--accent);text-decoration:none;user-select:all}
+button.copy{font:600 13px var(--body);border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 12px;border-radius:6px;cursor:pointer}
+button.copy:hover{border-color:var(--accent)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* terms band */
+.terms{display:flex;flex-wrap:wrap;gap:8px 28px;padding-block:16px;font-size:14px;color:var(--muted)}
+.terms b{color:var(--ink)}
+
+/* ledger */
+section.ledger{padding-block:12px 8px}
+.ledger h2{font-size:28px;margin-bottom:12px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:15px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+td a{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--line)}
+td a:hover{border-color:var(--accent)}
+.pct{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px}
+.dash{color:var(--muted)}
+
+/* deal sheets */
+.deals{display:flex;flex-direction:column;gap:28px;padding-block:28px 48px}
+article.deal{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+@media (max-width:860px){article.deal{grid-template-columns:1fr}}
+.gallery{display:flex;flex-direction:column;gap:6px;padding:6px;background:var(--bg);min-width:0}
+.gallery .main{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:6px;display:block;background:var(--line);max-width:100%}
+.thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.thumbs button{padding:0;border:2px solid transparent;border-radius:4px;overflow:hidden;cursor:pointer;background:none;aspect-ratio:3/2}
+.thumbs button[aria-pressed="true"]{border-color:var(--accent)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.facts{padding:24px 26px 26px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:4px}
+.deal h3{font-size:32px;margin-top:8px}
+.deal .addr{color:var(--muted);margin-top:2px}
+.price{text-align:right}
+.price .amt{font-family:var(--display);font-size:40px;font-weight:700;line-height:1}
+.price .alt{font-size:13px;color:var(--gold);font-weight:600;margin-top:4px}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.specs div{background:var(--surface);padding:8px 10px}
+.specs dt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.specs dd{margin:0;font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.arv{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline;background:var(--gold-soft);border-radius:6px;padding:10px 14px}
+.arv .big{font-family:var(--display);font-size:28px;font-weight:700;color:var(--gold)}
+.arv span{font-size:14px}
+.desc{margin:0;max-width:65ch}
+ul.hl{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+ul.hl li{font-size:13.5px;border:1px solid var(--line);border-radius:999px;padding:3px 11px}
+details{border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.comps{margin:10px 0 0;padding-left:20px;font-size:14.5px}
+.comps li{margin-bottom:6px}
+.comps .meta{color:var(--muted)}
+.parcel{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
+.note{font-size:13px;color:var(--muted);font-style:italic}
+
+footer{border-top:1px solid var(--line);background:var(--surface)}
+footer .wrap{padding-block:28px 40px;display:flex;flex-direction:column;gap:12px;font-size:13.5px;color:var(--muted)}
+footer strong{color:var(--ink)}
+footer .eho{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;line-height:1.25}
+footer .eho svg{flex:none}
+@media (prefers-reduced-motion:no-preference){.gallery .main{transition:opacity .15s}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Off-market inventory · Virginia · Updated {{UPDATED}}</div>
+      <h1>Virginia Off-Market Deals</h1>
+      <p>{{COUNT_WORD}} active properties for cash and hard/private-money buyers who can close quickly. Prices, ARVs and comps are listed per property.</p>
+    </div>
+    <div class="contact">
+      <div class="eyebrow">Contact to view or make an offer</div>
+      <div class="who">Daniel Yoon</div>
+      <div class="phone-row">
+        <a class="phone" href="tel:8048962695" id="phone">804-896-2695</a>
+        <button class="copy" id="copyPhone" type="button">Copy number</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap terms">
+  <span><b>Buyers:</b> Cash or hard/private money only</span>
+  <span><b>Showings:</b> By appointment only. Do not disturb occupants.</span>
+</div>
+
+<section class="wrap ledger">
+  <h2>At a glance</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Property</th><th>Area</th><th class="r">Price</th><th class="r">ARV</th><th class="r">Price / ARV</th><th class="r">Bd / Ba</th><th class="r">Sq ft</th><th class="r">Lot (ac)</th><th>Play</th></tr></thead>
+      <tbody id="ledger"></tbody>
+    </table>
+  </div>
+</section>
+
+<main class="wrap deals" id="deals"></main>
+
+<footer>
+  <div class="wrap">
+    <div><strong>Daniel Yoon · 804-896-2695</strong></div>
+    <div>All properties are offered either as owned or in conjunction with a business associate. Information comes from public records and seller-provided sources and is believed accurate but not guaranteed. ARVs and comps are estimates; buyers should verify all figures, condition and title before closing. Property is sold as-is.</div>
+    <div class="eho"><svg width="44" height="44" viewBox="0 0 64 64" role="img" aria-label="Equal Housing Opportunity logo"><path d="M32 4 2 28h7v32h46V28h7z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="miter"/><rect x="19" y="31" width="26" height="6" fill="currentColor"/><rect x="19" y="43" width="26" height="6" fill="currentColor"/></svg><span>Equal Housing<br>Opportunity</span></div>
+  </div>
+</footer>
+
+<script>
+const DEALS=/*DEALS_JSON*/;
+const $=s=>document.querySelector(s);
+const money=n=>"$"+n.toLocaleString("en-US");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const img=(d,i)=>`img/${d.slug}-${i}.jpg`;
+
+$("#ledger").innerHTML=DEALS.map(d=>`<tr>
+ <td><a href="#${d.id}">${esc(d.street)}</a></td><td>${esc(d.area)}</td>
+ <td class="r num">${money(d.price)}</td>
+ <td class="r num">${d.arv?money(d.arv):'<span class="dash">n/a</span>'}</td>
+ <td class="r num">${d.arv?`<span class="pct">${Math.round(d.price/d.arv*100)}%</span>`:'<span class="dash">n/a</span>'}</td>
+ <td class="r num">${esc(d.bb)}</td><td class="r num">${d.sqft.toLocaleString()}</td><td class="r num">${d.lot.toFixed(2)}</td><td>${esc(d.play)}</td></tr>`).join("");
+
+$("#deals").innerHTML=DEALS.map(d=>`<article class="deal" id="${d.id}">
+ <div class="gallery">
+  <img class="main" src="${img(d,d.photos[0])}" alt="${esc(d.street)}, photo 1" loading="lazy">
+  <div class="thumbs">${d.photos.map((p,i)=>`<button type="button" aria-pressed="${i===0}" aria-label="Show photo ${i+1}" data-src="${img(d,p)}"><img src="${img(d,p)}" alt="" loading="lazy"></button>`).join("")}</div>
+ </div>
+ <div class="facts">
+  <div class="top">
+   <div><span class="tag">Active · ${esc(d.play)}</span><h3>${esc(d.headline)}</h3><div class="addr">${esc(d.street)} ${esc(d.city)}</div></div>
+   <div class="price"><div class="eyebrow">Price</div><div class="amt num">${money(d.price)}</div>${d.alt?`<div class="alt">${esc(d.alt)}</div>`:""}</div>
+  </div>
+  <dl class="specs">
+   <div><dt>Beds</dt><dd>${esc(d.beds)}</dd></div><div><dt>Baths</dt><dd>${esc(d.baths)}</dd></div>
+   <div><dt>Sq ft</dt><dd>${d.sqft.toLocaleString()}</dd></div><div><dt>Lot</dt><dd>${d.lot.toFixed(2)} ac</dd></div>
+   <div><dt>Built</dt><dd>${d.year}</dd></div><div><dt>Taxes</dt><dd>${esc(d.taxes)}</dd></div>
+  </dl>
+  ${d.arv?`<div class="arv"><div><div class="eyebrow">ARV</div><div class="big num">${money(d.arv)}</div></div><span>Price is <b>${Math.round(d.price/d.arv*100)}%</b> of ARV, a gross spread of <b>${money(d.arv-d.price)}</b> before repairs and costs.</span></div>`:""}
+  <p class="desc">${esc(d.desc)}</p>
+  <ul class="hl">${d.hl.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
+  ${d.note?`<div class="note">${esc(d.note)}</div>`:""}
+  <details${d.comps.length?" open":""}><summary>${d.comps.length?`${esc(d.compsLabel||"Comps")} (${d.comps.length})`:"Parcel details"}</summary>
+   ${d.comps.length?`<ol class="comps">${d.comps.map(c=>`<li><b>${esc(c[0])}</b><br><span class="meta">${esc(c[1])} · ${esc(c[2])}</span></li>`).join("")}</ol>`:""}
+   <div class="parcel">PID ${esc(d.pid)} · Legal: ${esc(d.legal)}</div>
+  </details>
+ </div></article>`).join("");
+
+document.addEventListener("click",e=>{
+ const b=e.target.closest(".thumbs button"); if(!b) return;
+ const g=b.closest(".gallery"); const m=g.querySelector(".main");
+ m.src=b.dataset.src;
+ g.querySelectorAll(".thumbs button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+});
+$("#copyPhone").addEventListener("click",async e=>{
+ const btn=e.currentTarget;
+ try{await navigator.clipboard.writeText("804-896-2695");btn.textContent="Copied";}
+ catch{const r=document.createRange();r.selectNodeContents($("#phone"));const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent="Selected, press Ctrl+C";}
+ setTimeout(()=>btn.textContent="Copy number",2000);
+});
+</script>
+</body>
+</html>
