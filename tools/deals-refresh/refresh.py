@@ -1,7 +1,8 @@
 """Keep https://deals.propcomp.org in sync with the source's Active listings.
 
   python3 refresh.py plan    compare source vs live page; write work/plan.json
-  python3 refresh.py build   rebuild the page from work/plan.json and deploy it
+  python3 refresh.py build   rebuild the page from work/plan.json, deploy it, then verify it
+  python3 refresh.py verify  check the live page's addresses and prices against the source
 
 Between the two steps, every entry in work/plan.json "add" must get its
 headline, play, desc and hl written in our own words (needs_copy -> false).
@@ -148,12 +149,89 @@ def plan():
               for d in live if d["slug"] not in active]
     known = {d["slug"] for d in live}
     add = [parse_detail(c, scrape("detail", c["slug"])) for s, c in active.items() if s not in known]
-    price_changes = [{"street": d["street"], "live": d["price"], "source_card": active[d["slug"]]["price"]}
-                     for d in keep if active[d["slug"]]["price"] and active[d["slug"]]["price"] != d["price"]]
-    p = {"keep": keep, "remove": remove, "add": add, "price_changes_to_review": price_changes}
+    updates, conflicts = [], []
+    for d in keep:
+        src = parse_detail(active[d["slug"]], scrape("detail", d["slug"]))
+        u, c = sync_facts(d, src, active[d["slug"]])
+        updates += u
+        conflicts += c
+    for d in add:
+        conflicts += price_conflict(d, d, active[d["slug"]])
+    p = {"keep": keep, "remove": remove, "add": add, "updates": updates, "conflicts": conflicts}
     (WORK / "plan.json").write_text(json.dumps(p, indent=1))
     print(json.dumps({"keep": [d["street"] for d in keep], "remove": remove,
-                      "add": [d["street"] for d in add], "price_changes_to_review": price_changes}, indent=1))
+                      "add": [d["street"] for d in add], "updates": updates, "conflicts": conflicts}, indent=1))
+
+
+def lead_number(v):
+    m = re.match(r"\s*([\d.]+)", str(v or ""))
+    return float(m.group(1)) if m else None
+
+
+def price_conflict(d, src, card):
+    """The source's card and its listing page disagree on price: flag it, don't guess."""
+    if card["price"] and src["price"] and card["price"] != src["price"]:
+        note = (f"The asking price is being confirmed (${src['price']:,} vs ${card['price']:,} in seller materials). "
+                "Contact Daniel to confirm before making an offer.")
+        d["note"] = note
+        return [{"street": d["street"], "field": "price", "listing_page": src["price"], "card": card["price"],
+                 "kept": d["price"]}]
+    return []
+
+
+def sync_facts(d, src, card):
+    """Bring key facts of a listed deal in line with the source; return (updates, conflicts)."""
+    updates = []
+    conflicts = price_conflict(d, src, card)
+    if not conflicts and src["price"] and src["price"] != d["price"]:
+        updates.append({"street": d["street"], "field": "price", "from": d["price"], "to": src["price"]})
+        d["price"] = src["price"]
+    for field in ("street", "city", "alt", "arv", "sqft", "year", "lot", "taxes", "pid"):
+        new, old = src.get(field), d.get(field)
+        if new in (None, "", 0) or new == old:
+            continue
+        updates.append({"street": d["street"], "field": field, "from": old, "to": new})
+        d[field] = new
+    for field in ("beds", "baths"):
+        if lead_number(src[field]) is not None and lead_number(src[field]) != lead_number(d[field]):
+            updates.append({"street": d["street"], "field": field, "from": d[field], "to": src[field]})
+            d[field] = src[field]
+    bb = f"{card['beds']} / {card['baths']}"
+    if card["beds"] and bb != d["bb"]:
+        updates.append({"street": d["street"], "field": "bb", "from": d["bb"], "to": bb})
+        d["bb"] = bb
+    if not conflicts and d.get("note", "").startswith("The asking price is being confirmed"):
+        d.pop("note")
+        updates.append({"street": d["street"], "field": "note", "from": "price being confirmed", "to": None})
+    return updates, conflicts
+
+
+def verify(deals):
+    """Re-read the live page and the source; fail loudly if any address or price disagrees."""
+    live = {d["slug"]: d for d in json.loads(fetch(f"{LIVE}/data.json"))}
+    expected = {d["slug"]: d for d in deals}
+    problems = [f"{d['street']}: missing from live page" for s, d in expected.items() if s not in live]
+    problems += [f"{d['street']}: on live page but not expected" for s, d in live.items() if s not in expected]
+    cards = {c["slug"]: c for c in scrape("home")}
+    for s, d in live.items():
+        if s not in expected:
+            continue
+        for f in ("street", "city", "price"):
+            if d.get(f) != expected[s].get(f):
+                problems.append(f"{d['street']}: live {f} {d.get(f)!r} != built {expected[s].get(f)!r}")
+        card = cards.get(s)
+        if not card or card["status"].lower() != "active":
+            problems.append(f"{d['street']}: no longer Active on the source")
+            continue
+        number = re.match(r"[\d&\s-]+", d["street"])
+        if number and number.group(0).strip() not in card["address"]:
+            problems.append(f"{d['street']}: street number not in source address {card['address']!r}")
+        if card["price"] != d["price"] and not d.get("note", "").startswith("The asking price is being confirmed"):
+            problems.append(f"{d['street']}: live price ${d['price']:,} != source ${card['price']:,}")
+    if problems:
+        sys.exit("VERIFY FAILED:\n  " + "\n  ".join(problems))
+    print(f"Verified {len(live)} live deals: addresses and prices match the source "
+          f"(price conflicts in the source are flagged on the page).")
 
 
 def save_photo(raw, dest, width):
@@ -210,6 +288,7 @@ def build():
     (out / "data.json").write_text(json.dumps(deals, indent=1, ensure_ascii=False))
     (out / "robots.txt").write_text("User-agent: *\nDisallow: /\n")
     deploy(out, deals)
+    verify(deals)
 
 
 def deploy(out, deals):
@@ -243,4 +322,4 @@ return new Response("Not found",{status:404});}};""")
 
 
 if __name__ == "__main__":
-    {"plan": plan, "build": build}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: sys.exit(__doc__))()
+    {"plan": plan, "build": build, "verify": lambda: verify(json.loads(fetch(f"{LIVE}/data.json")))}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: sys.exit(__doc__))()
